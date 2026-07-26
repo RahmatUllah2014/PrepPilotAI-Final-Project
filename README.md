@@ -106,28 +106,34 @@ const response = await ai.models.generateContent({
 | **Backend Framework** | Node.js, Express, `tsx` server runner |
 | **PDF Processing** | `pdf-parse` (Server-side PDF text extraction) |
 | **Database & Auth** | Firebase Authentication, Cloud Firestore |
-| **Bundler & Build** | `esbuild` (Bundling server into `dist/server.cjs`), Vite static build |
-| **Hosting & Container** | Cloud Run (Port 3000 Node.js environment) |
+| **Hosting & Deployment** | Vercel |
 
 ---
 
-## 🖼️ Screenshots of App in Realtime
+## 🖼️ Screenshots of App in Action
 
-### 1. Student Dashboard & Chapter Mastery Overview
-![Student Dashboard](screenshots/dashboard_screenshot.jpg)
-*The central hub showing recent study notes, overall accuracy, and total chapters mastered.*
+### 1. Home Page of PrepPilotAI
+![Home Page](https://6a6647612a4b54c07b28be65.imgix.net/sandbox/Home%20Page.png?crop=focalpoint&fit=crop)
 
-### 2. PDF Lecture Upload & Processing Modal
-![Lecture Upload Modal](screenshots/pdf_upload_screenshot.jpg)
-*Upload PDFs or paste lecture notes to generate instant AI Study Kits with real-time processing.*
+### 2. Congratulation Messeage is Shown when a course is completed Successfully
+![Completion Page](https://6a6647612a4b54c07b28be65.imgix.net/sandbox/Congratulation%20Page.png?crop=focalpoint&fit=crop)
 
-### 3. Interactive Study Kit & Chapter Final Test
-![Chapter Assessment & Quiz](screenshots/quiz_mastery_screenshot.jpg)
-*Take chapter tests, achieve mastery status (70%+), and seamlessly continue to subsequent chapters.*
+### 3. Dashboard Page with Uploaded files.
+![Dashboard](https://6a6647612a4b54c07b28be65.imgix.net/sandbox/Dashboard.png?crop=focalpoint&fit=crop)
+
+### 4. Upload Page with Night Mode Function ON
+![Upload Page](https://6a6647612a4b54c07b28be65.imgix.net/sandbox/Upload%20Page.png?crop=focalpoint&fit=crop)
+*Take chapter tests, achieve mastery status (70%+), and seamlessly continue to subsequent chapters.
+
+### 5. My Notes Page with Dark Mode ON
+![My Notes Page](https://6a6647612a4b54c07b28be65.imgix.net/sandbox/DarkMode.png?crop=focalpoint&fit=crop)
+
+### 6. My Notes Page with Light Mode ON
+![My Notes Page](https://6a6647612a4b54c07b28be65.imgix.net/sandbox/My%20Notes%20Page.png?crop=focalpoint&fit=crop)
 
 ---
 
-## 🛠️ How the Project Was Built and Deployed
+## 🛠️ How to Run the Project 
 
 This project was developed and deployed using the following workflow:
 
@@ -155,55 +161,6 @@ This project was developed and deployed using the following workflow:
    * The GitHub repository was connected to **Vercel**.
    * The environment variables from the `.env` file were added to the Vercel project settings.
    * Vercel automatically built and deployed the application, enabling continuous deployment whenever changes were pushed to the main branch.
-
----
-
-## 🏃 How to Run the Project Locally
-
-### **Prerequisites**
-- **Node.js**: v18.0.0 or higher
-- **npm**: v9.0.0 or higher
-- **Google Gemini API Key**: Obtainable from [Google AI Studio](https://aistudio.google.com/)
-
-### **Step-by-Step Setup**
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/RahmatUllah2014/PrepPilotAI-Final-Project.git
-   cd PrepPilotAI-Final-Project
-   ```
-
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-
-3. **Configure Environment Variables**:
-   Create a `.env` file in the root directory (refer to `.env.example`):
-   ```env
-   # Server-side Google Gemini API Key (Secret)
-   GEMINI_API_KEY=your_gemini_api_key_here
-
-   # Client-side Firebase Configuration (Optional for Cloud Sync)
-   VITE_FIREBASE_API_KEY=your_firebase_api_key
-   VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-   VITE_FIREBASE_PROJECT_ID=your_project_id
-   VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-   VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
-   VITE_FIREBASE_APP_ID=your_app_id
-   ```
-
-4. **Start the Development Server**:
-   ```bash
-   npm run dev
-   ```
-   *The server runs on `http://localhost:3000` handling both Vite frontend assets and Express proxy routes.*
-
-5. **Build for Production**:
-   ```bash
-   npm run build
-   npm run start
-   ```
 
 ---
 
