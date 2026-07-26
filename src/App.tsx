@@ -11,15 +11,23 @@ import { PdfUploader } from './components/PdfUploader';
 import { StudyKitViewer } from './components/StudyKitViewer';
 import { DashboardView } from './components/DashboardView';
 import { HistoryView } from './components/HistoryView';
+import { AiChatModal } from './components/AiChatModal';
 import { SAMPLE_NOTES } from './lib/sampleData';
 import { NoteRecord } from './types';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, MessageSquare, Sparkles } from 'lucide-react';
 
 function AppContent() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'landing' | 'dashboard' | 'upload' | 'history' | 'studykit'>('landing');
   const [selectedNote, setSelectedNote] = useState<NoteRecord | null>(null);
   const [isUploaderOpen, setIsUploaderOpen] = useState(false);
+
+  // AI Chat Pop-up state
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatContext, setChatContext] = useState<{ pdfText: string; title: string }>({
+    pdfText: '',
+    title: '',
+  });
 
   const [isLoadingNotes, setIsLoadingNotes] = useState(false);
 
@@ -62,11 +70,21 @@ function AppContent() {
     }
   }, [notes]);
 
+  const handleOpenChatWithText = (pdfText: string, title: string) => {
+    setChatContext({ pdfText, title });
+    setIsChatOpen(true);
+  };
+
   const handleAnalysisComplete = (newRecord: NoteRecord) => {
     setNotes((prev) => [newRecord, ...prev.filter((n) => n.id !== newRecord.id)]);
     setSelectedNote(newRecord);
     setIsUploaderOpen(false);
     setActiveTab('studykit');
+    setChatContext({
+      pdfText: newRecord.pdfTextSnippet || newRecord.title,
+      title: newRecord.title,
+    });
+    setIsChatOpen(true);
   };
 
   const handleTrySample = () => {
@@ -112,9 +130,39 @@ function AppContent() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in">
           <PdfUploader
             onAnalysisComplete={handleAnalysisComplete}
+            onExtractAndOpenChat={(pdfText, title) => {
+              setIsUploaderOpen(false);
+              handleOpenChatWithText(pdfText, title);
+            }}
             onCancel={() => setIsUploaderOpen(false)}
           />
         </div>
+      )}
+
+      {/* Global AI Chat Modal */}
+      <AiChatModal
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        pdfText={chatContext.pdfText}
+        title={chatContext.title}
+      />
+
+      {/* Floating Chat Trigger Button */}
+      {(chatContext.pdfText || selectedNote) && !isChatOpen && !isUploaderOpen && (
+        <button
+          onClick={() => {
+            if (chatContext.pdfText) {
+              setIsChatOpen(true);
+            } else if (selectedNote) {
+              handleOpenChatWithText(selectedNote.pdfTextSnippet || selectedNote.title, selectedNote.title);
+            }
+          }}
+          className="fixed bottom-6 right-6 z-40 p-3.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white rounded-full shadow-2xl shadow-indigo-600/50 flex items-center gap-2.5 font-bold text-xs transition-all hover:scale-105 active:scale-95 group"
+          title="Open AI Chat Assistant"
+        >
+          <Sparkles className="w-5 h-5 text-indigo-200" />
+          <span className="hidden sm:inline">Ask AI Tutor</span>
+        </button>
       )}
 
       {/* Main Dynamic View Area */}
@@ -162,6 +210,9 @@ function AppContent() {
             <StudyKitViewer
               note={selectedNote}
               onBack={() => setActiveTab('dashboard')}
+              onOpenChat={() => {
+                handleOpenChatWithText(selectedNote.pdfTextSnippet || selectedNote.title, selectedNote.title);
+              }}
             />
           ) : (
             <div className="max-w-3xl mx-auto px-4 py-16 text-center space-y-6">

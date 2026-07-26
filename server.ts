@@ -210,6 +210,76 @@ Required JSON Structure:
     }
   });
 
+  // Server-side Gemini Chat Endpoint for Q&A on Extracted PDF Text
+  app.post('/api/chat', async (req, res) => {
+    try {
+      const { pdfText, title, messages, userQuestion } = req.body || {};
+
+      if (!userQuestion || typeof userQuestion !== 'string' || !userQuestion.trim()) {
+        return res.status(400).json({ error: 'Please provide a valid question.' });
+      }
+
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ error: 'GEMINI_API_KEY is missing on server.' });
+      }
+
+      const ai = new GoogleGenAI({
+        apiKey,
+        httpOptions: {
+          headers: {
+            'User-Agent': 'aistudio-build',
+          },
+        },
+      });
+
+      const contextSnippet = (pdfText && typeof pdfText === 'string') 
+        ? pdfText.slice(0, 30000) 
+        : 'No PDF text context provided.';
+
+      const docTitle = title || 'Extracted Document';
+
+      let conversationHistory = '';
+      if (Array.isArray(messages) && messages.length > 0) {
+        conversationHistory = messages.slice(-6).map((m: any) => `${m.sender === 'user' ? 'Student' : 'PrepPilot AI'}: ${m.text}`).join('\n');
+      }
+
+      const prompt = `You are PrepPilot AI, an expert university tutor.
+You are helping a student study their document titled "${docTitle}".
+
+Reference Document Text Context:
+"""
+${contextSnippet}
+"""
+
+${conversationHistory ? `Previous Conversation:\n${conversationHistory}\n` : ''}
+Student Question: ${userQuestion}
+
+Instructions:
+- Provide a clear, articulate, and accurate answer based directly on the document text.
+- Use bullet points, bold key terms, and scannable formatting.
+- Be encouraging, concise, and helpful for exam preparation.`;
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-3.6-flash',
+        contents: prompt,
+      });
+
+      const answer = response.text || 'Sorry, I could not generate an answer at this time.';
+
+      return res.json({
+        success: true,
+        answer,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (err: any) {
+      console.error('Server /api/chat error:', err);
+      return res.status(500).json({
+        error: err?.message || 'Failed to process chat query with Gemini AI.',
+      });
+    }
+  });
+
   // Vite Integration
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({

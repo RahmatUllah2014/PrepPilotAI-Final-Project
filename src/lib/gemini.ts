@@ -69,3 +69,38 @@ export async function analyzeNotesWithGemini(
 
   return data;
 }
+
+export interface ChatMessage {
+  id: string;
+  sender: 'user' | 'assistant';
+  text: string;
+  timestamp: string;
+}
+
+export async function sendChatQuestionToGemini(
+  pdfText: string,
+  title: string,
+  messages: ChatMessage[],
+  userQuestion: string
+): Promise<string> {
+  const response = await fetch('/api/chat', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      pdfText,
+      title,
+      messages,
+      userQuestion,
+    }),
+  });
+
+  const jsonResult = await response.json();
+  if (!response.ok || !jsonResult.success) {
+    throw new Error(jsonResult.error || 'Failed to send question to AI Tutor.');
+  }
+
+  return jsonResult.answer;
+}
+

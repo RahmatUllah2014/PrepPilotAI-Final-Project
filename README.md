@@ -5,8 +5,8 @@
 ---
 
 ### 🌐 Live Demo & Repository
-- **Live Deployed App**: [https://ais-pre-w4tgqz33ofrh3jalonle4b-17110160861.asia-southeast1.run.app](https://ais-pre-w4tgqz33ofrh3jalonle4b-17110160861.asia-southeast1.run.app)
-- **Public GitHub Repository**: `https://github.com/rahmat-ullah/preppilot-ai` *(Ensure repo visibility is set to PUBLIC)*
+- **Live Deployed App**: [https://prep-pilot-ai-final-project.vercel.app/](https://prep-pilot-ai-final-project.vercel.app/)
+- **Public GitHub Repository**: [https://github.com/RahmatUllah2014/PrepPilotAI-Final-Project](https://github.com/RahmatUllah2014/PrepPilotAI-Final-Project)
 
 ---
 
@@ -157,8 +157,8 @@ ${documentText}
 Clone the repository and install all node packages:
 
 ```bash
-git clone https://github.com/your-username/preppilot-ai.git
-cd preppilot-ai
+git clone https://github.com/RahmatUllah2014/PrepPilotAI-Final-Project.git
+cd PrepPilotAI-Final-Project
 npm install
 ```
 
@@ -238,7 +238,7 @@ Crafted with care by **Rahmat Ullah** (University of Balochistan, Quetta).
 
 - **Email**: Rehmatkhan2014@gmail.com
 - **Institution**: University of Balochistan, Quetta
-- **GitHub**: [@your-username](https://github.com/your-username)
+- **GitHub**: [@RahmatUllah2014](https://github.com/RahmatUllah2014)
 - **LinkedIn**: [Your Profile](https://linkedin.com/in/your-profile)
 
 ---

@@ -24,9 +24,10 @@ import {
 interface PdfUploaderProps {
   onAnalysisComplete: (record: NoteRecord) => void;
   onCancel?: () => void;
+  onExtractAndOpenChat?: (pdfText: string, title: string) => void;
 }
 
-export const PdfUploader: React.FC<PdfUploaderProps> = ({ onAnalysisComplete, onCancel }) => {
+export const PdfUploader: React.FC<PdfUploaderProps> = ({ onAnalysisComplete, onCancel, onExtractAndOpenChat }) => {
   const { user } = useAuth();
   const [activeMode, setActiveMode] = useState<'pdf' | 'text'>('pdf');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -100,7 +101,7 @@ export const PdfUploader: React.FC<PdfUploaderProps> = ({ onAnalysisComplete, on
     }
   };
 
-  // Dedicated test function: Extract PDF text with PDF.js for testing
+  // Dedicated function: Extract PDF text with PDF.js and trigger AI Chat Pop-up
   const handleExtractTextOnly = async () => {
     if (!selectedFile) {
       setError('Please select a PDF file first.');
@@ -122,8 +123,13 @@ export const PdfUploader: React.FC<PdfUploaderProps> = ({ onAnalysisComplete, on
       setExtractedText(result.text);
       setExtractedPageCount(result.pageCount);
       setShowPreviewText(true);
+      const title = lectureTitle || result.title || selectedFile.name.replace(/\.pdf$/i, '');
       if (!lectureTitle) {
-        setLectureTitle(result.title);
+        setLectureTitle(title);
+      }
+
+      if (onExtractAndOpenChat) {
+        onExtractAndOpenChat(result.text, title);
       }
     } catch (err: any) {
       console.error('Text Extraction Error:', err);
@@ -463,15 +469,35 @@ export const PdfUploader: React.FC<PdfUploaderProps> = ({ onAnalysisComplete, on
           </div>
         </div>
       ) : (
-        /* Submit Button */
-        <button
-          type="button"
-          onClick={handleAnalyze}
-          className="mt-6 w-full py-3.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/25 transition-all text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-95"
-        >
-          <Sparkles className="w-4 h-4" />
-          <span>Generate Study Kit with Gemini AI</span>
-        </button>
+        /* Action Buttons */
+        <div className="mt-6 flex flex-col sm:flex-row items-center gap-3">
+          {activeMode === 'pdf' && (
+            <button
+              type="button"
+              onClick={async () => {
+                if (!extractedText) {
+                  await handleExtractTextOnly();
+                } else if (onExtractAndOpenChat) {
+                  onExtractAndOpenChat(extractedText, lectureTitle || selectedFile?.name.replace(/\.pdf$/i, '') || 'Uploaded Note');
+                }
+              }}
+              disabled={!selectedFile || isExtractingOnly}
+              className="w-full sm:flex-1 py-3 px-4 bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/15 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-slate-200 font-bold rounded-xl transition-all text-xs sm:text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 text-indigo-600 dark:text-indigo-400 ${isExtractingOnly ? 'animate-spin' : ''}`} />
+              <span>{isExtractingOnly ? 'Extracting Text...' : 'Extract Text & Ask AI Questions'}</span>
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={handleAnalyze}
+            className="w-full sm:flex-1 py-3.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/25 transition-all text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-95"
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>Generate Study Kit with Gemini AI</span>
+          </button>
+        </div>
       )}
     </div>
   );
