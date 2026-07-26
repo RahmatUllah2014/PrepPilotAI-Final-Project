@@ -1,246 +1,188 @@
-# PrepPilot AI — AI Study Note Generator 🎓⚡
+# PrepPilot AI — AI Study Kit & Chapter Mastery Engine 🎓⚡
 
-> Transform dense lecture PDFs, slides, and course materials into interactive, hyper-structured study kits featuring executive summaries, flashcards, self-grading quizzes, key topic breakdowns, and adaptive study plans powered by Gemini 2.5 Flash.
-
----
-
-### 🌐 Live Demo & Repository
-- **Live Deployed App**: [https://prep-pilot-ai-final-project.vercel.app/](https://prep-pilot-ai-final-project.vercel.app/)
-- **Public GitHub Repository**: [https://github.com/RahmatUllah2014/PrepPilotAI-Final-Project](https://github.com/RahmatUllah2014/PrepPilotAI-Final-Project)
+> PrepPilot AI is an intelligent learning platform that transforms dense lecture PDFs, slides, and study materials into structured, interactive **Study Kits** featuring executive summaries, key topic breakdowns, flip flashcards, chapter final assessment tests with mastery tracking, AI tutor assistance, and personalized study schedules powered by **Google Gemini 2.5 Flash**.
 
 ---
 
-## 📌 Problem Statement
+## 🌐 Live Deployed URL & Repositories
 
-College students and self-directed learners spend up to **60% of their study time** manually organizing raw lecture materials—reading 50-page slides, creating handwritten flashcards, drafting practice questions, and organizing revision schedules—rather than actively studying and testing their understanding. 
-
-**PrepPilot AI** eliminates this cognitive load. By ingesting raw lecture PDFs and text documents, PrepPilot AI leverages multimodal large language models to construct a complete, interactive, end-to-end **Study Kit** in under 15 seconds.
-
----
-
-## ✨ Features
-
-- 📑 **Multimodal PDF & Document Processing**: Upload lecture PDFs or paste raw notes up to 100,000 words. Extracts structured text directly in Node.js server pipelines.
-- 🎯 **Comprehensive Study Kits**: Generates 5 high-impact study assets per document:
-  - **Executive Summary**: Core concepts, key takeaways, and TL;DR highlights.
-  - **Interactive Flashcards**: Flip-to-reveal cards with active recall tracking & keyboard navigation (`Left`/`Right` arrows, `Space`).
-  - **Self-Grading Quizzes**: Multiple-choice assessment with instant answer explanations, score calculations, and grade ratings.
-  - **Structured Key Topics**: Categorized topic breakdown with difficulty ratings and core formulas.
-  - **Adaptive 5-Day Study Plan**: Actionable day-by-day revision strategy with prioritized milestones.
-- ☁️ **Cloud Storage & Sync**: Firebase Auth & Cloud Firestore sync for saving, managing, and exporting study notes across sessions and devices.
-- 📄 **Export Options**: Export study materials to clean, print-ready PDF reports or markdown files.
-- 🎨 **SaaS-Grade UI & Themes**: Seamless Dark & Light mode toggle, responsive mobile drawer navigation, keyboard shortcuts, and smooth loading skeletons.
+- 🚀 **Live Deployed App**: [https://prep-pilot-ai-final-project.vercel.app/](https://prep-pilot-ai-final-project.vercel.app/)
+- 📦 **GitHub Repository**: [https://github.com/RahmatUllah2014/PrepPilotAI-Final-Project](https://github.com/RahmatUllah2014/PrepPilotAI-Final-Project)
 
 ---
 
-## 🛠️ Tech Stack
+## 📌 Problem Statement & Target Audience
 
-### **Frontend**
-- **Framework**: React 18 with TypeScript & Vite
-- **Styling**: Tailwind CSS, `clsx`, `tailwind-merge`
-- **Animations**: `framer-motion` (Motion 12)
-- **Icons**: `lucide-react`
-- **Themes**: `next-themes`
+### **The Problem**
+Students, university researchers, and self-directed learners routinely spend **over 60% of their total study time** manually processing raw lecture slides and textbooks—reading 50+ page PDFs, taking handwritten notes, creating flashcards, drafting practice questions, and organizing study timelines—rather than actively learning and testing their understanding.
 
-### **Backend**
-- **Runtime**: Node.js with Express & `tsx`
-- **PDF Extraction**: `pdf-parse`
-- **Bundler**: `esbuild` for production server build (`dist/server.cjs`)
-
-### **AI & Database**
-- **LLM Engine**: Google Gemini API (`@google/genai` SDK with `gemini-2.5-flash`)
-- **Authentication**: Firebase Authentication
-- **Database**: Cloud Firestore
+### **The Solution & Audience**
+**PrepPilot AI** eliminates manual note preparation for university students, high schoolers, and professional exam candidates. By uploading raw lecture PDFs or pasting course text, PrepPilot AI leverages multimodal large language models to construct an interactive, end-to-end **Study Kit** in under 15 seconds, complete with a **Chapter Mastery Assessment System** that validates learning and unlocks subsequent study chapters.
 
 ---
 
-## 🤖 AI Feature
+## ✨ Features List
 
-The core intelligence behind PrepPilot AI is driven by **Google Gemini 2.5 Flash**. The backend routes incoming document payloads directly through Express proxy endpoints to Google GenAI services, keeping API keys strictly isolated from the client.
+1. 📄 **Multimodal PDF & Document Processing**
+   - Direct PDF file upload and text extraction (supports up to 100,000 words).
+   - Drag-and-drop file uploader with live page count and text snippet previews.
+   - Built-in sample lecture generator for instant testing.
 
-Gemini analyzes the full text structure and outputs a guaranteed **Structured JSON Object** defining the summary, flashcards, quiz questions, key topics, and study timeline with strict schema validation.
+2. 🎯 **Automated AI Study Kit Generation**
+   - **Executive Summary**: Key takeaways, core takeaways, and formatted markdown breakdowns.
+   - **Key Topic Categorization**: Ranked concepts with importance tags (High / Medium / Low).
+   - **Interactive Flip Flashcards**: Active-recall study mode with keyboard shortcuts (`Left`/`Right` arrows, `Space` bar) and flip animations.
+   - **Chapter Final Assessment (Quiz Mode)**: Self-grading multiple-choice test with immediate feedback and detailed explanations for every option.
+   - **5-Day Adaptive Study Plan**: Daily revision strategy with actionable task checklists.
+
+3. 🏆 **Chapter Mastery & Progress Tracking**
+   - Scoring 70%+ on a chapter final assessment earns **Chapter Mastered** status.
+   - Automatic progression buttons allowing students to immediately jump to the next chapter upon mastering the current one.
+   - Real-time statistics showing total study kits created, total questions answered, and total chapters mastered.
+
+4. 🤖 **Interactive AI Academic Tutor Chatbot**
+   - Integrated floating AI chat assistant for asking clarifying questions about any study note.
+   - Context-aware answers based directly on the lecture contents.
+
+5. ☁️ **Cloud Storage & Database Sync**
+   - Firebase Authentication for personal student accounts.
+   - Cloud Firestore integration for cross-device sync of all saved study kits, quiz scores, and chapter mastery states.
+
+6. 📄 **Study Kit Export Options**
+   - Download study notes as clean, formatted Markdown (`.md`) files.
+   - Copy entire JSON structured study kits to clipboard for custom integrations.
+
+7. 🎨 **Modern SaaS Design & Accessibility**
+   - Fluid dark and light theme toggle.
+   - Fully responsive layout for desktop, tablet, and mobile devices.
+   - Smooth modal scrollability and intuitive keyboard focus states.
 
 ---
 
-## 💡 Gemini Prompt Architecture
+## 🤖 The AI Feature & System Prompt
+
+The core intelligence behind PrepPilot AI is driven by **Google Gemini 2.5 Flash** (`@google/genai` SDK). All AI requests are routed through a secure Express backend server proxy (`/api/generate-notes`), ensuring API keys remain completely secret and hidden from client-side network inspect tools.
+
+### **System Prompt & Instructions behind Gemini 2.5 Flash**
 
 ```typescript
-const prompt = `
-You are an expert academic tutor and study assistant. Analyze the following lecture text or document content and generate a comprehensive, highly structured Study Kit.
+// System instruction used in server.ts for generating structured Study Kits
+const systemInstruction = `
+You are an elite academic professor, expert tutor, and instructional designer. 
+Your goal is to transform dense educational text or lecture notes into a hyper-structured, high-yield interactive Study Kit.
 
-Required output format: JSON with the following exact schema:
-{
-  "title": "Clear concise subject title",
-  "summary": "Detailed, well-structured summary in Markdown format using bullet points and headers",
-  "keyTopics": [
-    { "title": "Topic name", "description": "Core explanation", "importance": "High" | "Medium" | "Low" }
-  ],
-  "flashcards": [
-    { "front": "Concept or Question", "back": "Clear, precise Answer or Explanation" }
-  ],
-  "quiz": [
-    {
-      "question": "Multiple choice question",
-      "options": ["Option A", "Option B", "Option C", "Option D"],
-      "correctAnswer": 0,
-      "explanation": "Detailed explanation of why this answer is correct"
-    }
-  ],
-  "studyPlan": [
-    { "day": 1, "focus": "Core focus", "tasks": ["Task 1", "Task 2"] }
-  ]
-}
-
-Document Content:
-${documentText}
+Guidelines for output:
+1. Executive Summary: Provide an in-depth summary formatted in clean Markdown with key headers, bullet points, bold terms, and clear conceptual breakdowns.
+2. Key Topics: Extract 3-6 core topics, assigning importance levels ("High", "Medium", "Low") and concise explanations.
+3. Interactive Flashcards: Generate 5-10 high-impact Q&A flashcards designed for active recall.
+4. Chapter Final Test (Quiz): Generate 5-10 challenging multiple-choice questions testing deep comprehension. Every question must include 4 options, the exact correct answer string, and a thorough explanation.
+5. Study Plan: Provide a realistic 5-day step-by-step revision schedule.
 `;
+
+// Gemini API Call with Structured JSON Schema Output
+const response = await ai.models.generateContent({
+  model: 'gemini-2.5-flash',
+  contents: [
+    { role: 'user', parts: [{ text: `Generate a complete Study Kit for the following lecture content:\n\n${pdfText}` }] }
+  ],
+  config: {
+    systemInstruction,
+    responseMimeType: 'application/json',
+    responseSchema: studyKitJsonSchema, // Enforces exact TypeScript shape
+    temperature: 0.2,
+  },
+});
 ```
 
 ---
 
-## 🖼️ Screenshots
+## 🛠️ Tools, Services, and AI Models Used
 
-| Dashboard & Upload | Interactive Flashcards |
-| :---: | :---: |
-| ![Dashboard](https://placehold.co/600x350/0f172a/ffffff?text=PrepPilot+AI+Dashboard) | ![Flashcards](https://placehold.co/600x350/0f172a/ffffff?text=Interactive+Flashcards) |
-
-| Quiz Assessment | Key Topics & Study Plan |
-| :---: | :---: |
-| ![Quiz](https://placehold.co/600x350/0f172a/ffffff?text=Self-Grading+Quiz) | ![Study Plan](https://placehold.co/600x350/0f172a/ffffff?text=5-Day+Study+Plan) |
-
----
-
-## 📁 Folder Structure
-
-```
-.
-├── server.ts                    # Express server entry point & Gemini/PDF proxy routes
-├── index.html                   # Application HTML shell
-├── metadata.json                # AI Studio application metadata
-├── package.json                 # Dependencies & build scripts
-├── firestore.rules              # Firebase Firestore security rules
-├── firebase-applet-config.json  # Firebase client credentials
-├── .env.example                 # Environment variables template
-└── src/
-    ├── main.tsx                 # React entry point
-    ├── App.tsx                  # Primary application container & tab router
-    ├── index.css                # Tailwind CSS global styles
-    ├── types.ts                 # TypeScript interfaces for Study Kits & Auth
-    ├── context/
-    │   └── AuthContext.tsx      # Firebase Auth state provider & modal context
-    ├── lib/
-    │   ├── firebase.ts          # Firebase SDK initialization
-    │   ├── firestoreNotes.ts    # Firestore CRUD operations for saved notes
-    │   ├── gemini.ts            # Client-side API caller to backend /api/generate-notes
-    │   ├── pdf.ts               # Client PDF text reader & backend uploader
-    │   └── sampleData.ts        # Fallback CS 301 Data Structures sample note
-    └── components/
-        ├── Navbar.tsx           # Responsive header, drawer navigation & user menu
-        ├── ThemeToggle.tsx      # Dark / Light / System theme selector
-        ├── AuthModal.tsx        # Firebase Sign-in / Sign-up dialog
-        ├── HeroLanding.tsx      # High-converting landing page & feature highlights
-        ├── DashboardView.tsx    # Upload CTA, statistics, and recent notes grid
-        ├── PdfUploader.tsx      # Drag-and-drop file upload & progress modal
-        ├── StudyKitViewer.tsx   # Tabbed view for Summary, Flashcards, Quiz, Topics, Plan
-        ├── SummaryView.tsx      # Markdown summary renderer
-        ├── FlashcardsView.tsx   # Flip-cards with keyboard navigation & mastery tracking
-        ├── QuizView.tsx         # Interactive multiple-choice exam simulation
-        ├── TopicsView.tsx       # Breakdown of core concepts by priority
-        ├── StudyPlanView.tsx    # Day-by-day revision milestone checklist
-        └── HistoryView.tsx      # Saved study notes gallery with search & filters
-```
+| Category | Tools / Services / Technologies |
+| :--- | :--- |
+| **AI Model** | Google Gemini 2.5 Flash (`@google/genai` SDK) |
+| **Frontend Framework** | React 18, TypeScript, Vite |
+| **Styling & Icons** | Tailwind CSS v4, Lucide Icons, Framer Motion |
+| **Backend Framework** | Node.js, Express, `tsx` server runner |
+| **PDF Processing** | `pdf-parse` (Server-side PDF text extraction) |
+| **Database & Auth** | Firebase Authentication, Cloud Firestore |
+| **Bundler & Build** | `esbuild` (Bundling server into `dist/server.cjs`), Vite static build |
+| **Hosting & Container** | Cloud Run (Port 3000 Node.js environment) |
 
 ---
 
-## 📦 Installation
+## 🖼️ Screenshots of App in Action
 
-Clone the repository and install all node packages:
+### 1. Student Dashboard & Chapter Mastery Overview
+![Student Dashboard](https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200&auto=format&fit=crop)
+*The central hub showing recent study notes, overall accuracy, and total chapters mastered.*
 
-```bash
-git clone https://github.com/RahmatUllah2014/PrepPilotAI-Final-Project.git
-cd PrepPilotAI-Final-Project
-npm install
-```
+### 2. PDF Lecture Upload & Processing Modal
+![Lecture Upload Modal](https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=1200&auto=format&fit=crop)
+*Upload PDFs or paste lecture notes to generate instant AI Study Kits.*
 
----
-
-## 🔑 Environment Variables
-
-Copy `.env.example` to `.env` and fill in your API credentials:
-
-```bash
-cp .env.example .env
-```
-
-Required keys:
-```env
-# Server-side Google Gemini API Key (Secret - never exposed to browser)
-GEMINI_API_KEY=your_gemini_api_key_here
-
-# Client-side Firebase Configuration
-VITE_FIREBASE_API_KEY=your_firebase_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=your_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
-VITE_FIREBASE_APP_ID=your_app_id
-```
+### 3. Interactive Study Kit & Chapter Final Test
+![Chapter Assessment & Quiz](https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=1200&auto=format&fit=crop)
+*Take chapter tests, achieve mastery status (70%+), and seamlessly continue to subsequent chapters.*
 
 ---
 
-## 🏃 Run Locally
+## 🏃 How to Run the Project Locally
 
-Start the full-stack development server (Express + Vite on port 3000):
+### **Prerequisites**
+- **Node.js**: v18.0.0 or higher
+- **npm**: v9.0.0 or higher
+- **Google Gemini API Key**: Obtainable from [Google AI Studio](https://aistudio.google.com/)
 
-```bash
-npm run dev
-```
+### **Step-by-Step Setup**
 
-Open your browser and navigate to `http://localhost:3000`.
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/RahmatUllah2014/PrepPilotAI-Final-Project.git
+   cd PrepPilotAI-Final-Project
+   ```
 
----
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-## 🚀 Deployment
+3. **Configure Environment Variables**:
+   Create a `.env` file in the root directory (refer to `.env.example`):
+   ```env
+   # Server-side Google Gemini API Key (Secret)
+   GEMINI_API_KEY=your_gemini_api_key_here
 
-### **Deployment Options**
+   # Client-side Firebase Configuration (Optional for Cloud Sync)
+   VITE_FIREBASE_API_KEY=your_firebase_api_key
+   VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+   VITE_FIREBASE_PROJECT_ID=your_project_id
+   VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+   VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+   VITE_FIREBASE_APP_ID=your_app_id
+   ```
 
-#### 1. **Vercel Deployment (Serverless Functions)**
-- Push code to GitHub.
-- Import project into Vercel.
-- Configure `GEMINI_API_KEY` and `VITE_FIREBASE_*` environment variables in Vercel settings.
-- Set Framework Preset to **Vite** or **Node.js Server**.
+4. **Start the Development Server**:
+   ```bash
+   npm run dev
+   ```
+   *The server runs on `http://localhost:3000` handling both Vite frontend assets and Express proxy routes.*
 
-#### 2. **Docker / Cloud Run / Container Deployment**
-To build the server for production:
-
-```bash
-# Build Vite client assets & compile server.ts into dist/server.cjs
-npm run build
-
-# Start the standalone server
-npm run start
-```
-
----
-
-## 🔮 Future Improvements
-
-- 🎙️ **Audio Lecture Transcriber**: Direct audio upload (MP3/M4A) with Gemini Multimodal Audio analysis.
-- 📊 **Spaced Repetition System (SRS)**: SuperMemo SM-2 algorithm for optimized flashcard review scheduling.
-- 👥 **Collaborative Study Groups**: Real-time shared notes & multiplayer quiz challenges.
-- 📱 **Mobile Native Companion**: React Native companion app with offline flashcard sync.
+5. **Build for Production**:
+   ```bash
+   npm run build
+   npm run start
+   ```
 
 ---
 
 ## 👤 Author
 
-Crafted with care by **Rahmat Ullah** (University of Balochistan, Quetta).
-
-- **Email**: Rehmatkhan2014@gmail.com
+**Rahmat Ullah**
 - **Institution**: University of Balochistan, Quetta
+- **Email**: Rehmatkhan2014@gmail.com
 - **GitHub**: [@RahmatUllah2014](https://github.com/RahmatUllah2014)
-- **LinkedIn**: [Your Profile](https://linkedin.com/in/your-profile)
 
 ---
 
-*PrepPilot AI — Master any subject in minutes, not hours.*
+*PrepPilot AI — Master any subject chapter by chapter.*
