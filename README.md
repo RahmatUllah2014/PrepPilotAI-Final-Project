@@ -114,15 +114,15 @@ const response = await ai.models.generateContent({
 ## 🖼️ Screenshots of App in Action
 
 ### 1. Student Dashboard & Chapter Mastery Overview
-![Student Dashboard](./screenshots/dashboard.jpg)
+![Student Dashboard](https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200&auto=format&fit=crop)
 *The central hub showing recent study notes, overall accuracy, and total chapters mastered.*
 
 ### 2. PDF Lecture Upload & Processing Modal
-![Lecture Upload Modal](./screenshots/upload.jpg)
+![Lecture Upload Modal](https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=1200&auto=format&fit=crop)
 *Upload PDFs or paste lecture notes to generate instant AI Study Kits.*
 
 ### 3. Interactive Study Kit & Chapter Final Test
-![Chapter Assessment & Quiz](./screenshots/study-kit.jpg)
+![Chapter Assessment & Quiz](https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=1200&auto=format&fit=crop)
 *Take chapter tests, achieve mastery status (70%+), and seamlessly continue to subsequent chapters.*
 
 ---
