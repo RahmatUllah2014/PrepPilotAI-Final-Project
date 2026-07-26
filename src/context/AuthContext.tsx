@@ -37,24 +37,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser: User | null) => {
-      if (firebaseUser) {
-        const uProfile: UserProfile = {
-          uid: firebaseUser.uid,
-          email: firebaseUser.email,
-          displayName: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Student',
-          photoURL: firebaseUser.photoURL,
-          createdAt: new Date().toISOString(),
-        };
-        setUser(uProfile);
-        localStorage.setItem(LOCAL_USER_KEY, JSON.stringify(uProfile));
-        saveUserProfileToFirestore(uProfile);
+    let unsubscribe = () => {};
+    try {
+      if (auth && typeof auth === 'object') {
+        unsubscribe = onAuthStateChanged(auth, (firebaseUser: User | null) => {
+          if (firebaseUser) {
+            const uProfile: UserProfile = {
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              displayName: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Student',
+              photoURL: firebaseUser.photoURL,
+              createdAt: new Date().toISOString(),
+            };
+            setUser(uProfile);
+            localStorage.setItem(LOCAL_USER_KEY, JSON.stringify(uProfile));
+            saveUserProfileToFirestore(uProfile);
+          } else {
+            setUser(null);
+            localStorage.removeItem(LOCAL_USER_KEY);
+          }
+          setLoading(false);
+        }, () => {
+          setLoading(false);
+        });
       } else {
-        setUser(null);
-        localStorage.removeItem(LOCAL_USER_KEY);
+        setLoading(false);
       }
+    } catch (err) {
+      console.warn('Auth state listener exception:', err);
       setLoading(false);
-    });
+    }
 
     return () => unsubscribe();
   }, []);

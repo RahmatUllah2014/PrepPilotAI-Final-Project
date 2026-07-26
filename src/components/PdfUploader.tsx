@@ -262,8 +262,8 @@ export const PdfUploader: React.FC<PdfUploaderProps> = ({ onAnalysisComplete, on
         pageCount,
       };
 
-      // Save to Firestore & local storage
-      await saveNoteToFirestore(newRecord);
+      // Save to Firestore & local storage asynchronously (non-blocking)
+      saveNoteToFirestore(newRecord).catch(e => console.warn('Background note save notice:', e));
 
       setProgressPercent(100);
 
