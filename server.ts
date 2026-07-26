@@ -16,6 +16,23 @@ async function startServer() {
 
   app.use(express.json({ limit: '50mb' }));
 
+  // Serve screenshots statically
+  app.use('/screenshots', express.static(path.join(process.cwd(), 'screenshots')));
+
+  // Endpoint to download or view README.md
+  app.get('/api/download-readme', (req, res) => {
+    const readmePath = path.join(process.cwd(), 'README.md');
+    res.download(readmePath, 'README.md', (err) => {
+      if (err) {
+        res.status(404).send('README.md file not found');
+      }
+    });
+  });
+
+  app.get('/README.md', (req, res) => {
+    res.sendFile(path.join(process.cwd(), 'README.md'));
+  });
+
   // API Health Check Endpoint
   app.get('/api/health', (req, res) => {
     res.json({ 

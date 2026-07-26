@@ -14,6 +14,17 @@ export const Footer: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-6 text-slate-500 dark:text-slate-400">
+          <a 
+            href="/api/download-readme" 
+            download="README.md"
+            className="hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors flex items-center gap-1 font-medium text-slate-600 dark:text-slate-300"
+            title="Download full project README.md documentation"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            <span>Download README.md</span>
+          </a>
           <span className="hover:text-slate-900 dark:hover:text-slate-200 cursor-pointer">Privacy Policy</span>
           <span className="hover:text-slate-900 dark:hover:text-slate-200 cursor-pointer">Terms of Service</span>
           <span className="hover:text-slate-900 dark:hover:text-slate-200 cursor-pointer">Gemini 3.6 Flash Integration</span>
