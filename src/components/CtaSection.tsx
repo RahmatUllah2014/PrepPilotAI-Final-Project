@@ -3,10 +3,9 @@ import { Upload, Sparkles, BookOpen } from 'lucide-react';
 
 interface CtaSectionProps {
   onOpenUpload: () => void;
-  onTrySample: () => void;
 }
 
-export const CtaSection: React.FC<CtaSectionProps> = ({ onOpenUpload, onTrySample }) => {
+export const CtaSection: React.FC<CtaSectionProps> = ({ onOpenUpload }) => {
   return (
     <section className="relative z-10 py-16 px-6 lg:px-12 max-w-7xl mx-auto my-8">
       <div className="relative rounded-3xl overflow-hidden p-8 sm:p-12 bg-gradient-to-r from-indigo-950/80 via-slate-900/90 to-blue-950/80 border border-indigo-500/30 backdrop-blur-2xl text-center flex flex-col items-center">
@@ -26,21 +25,13 @@ export const CtaSection: React.FC<CtaSectionProps> = ({ onOpenUpload, onTrySampl
           Join thousands of university students saving hours every week. Upload your lecture PDF and receive your complete study kit right now.
         </p>
 
-        <div className="mt-8 flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+        <div className="mt-8 flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center">
           <button
             onClick={onOpenUpload}
             className="px-8 py-3.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold rounded-2xl shadow-xl shadow-indigo-600/30 hover:scale-[1.02] transition-all text-sm flex items-center justify-center gap-2"
           >
             <Upload className="w-4 h-4" />
             <span>Upload PDF Lecture</span>
-          </button>
-
-          <button
-            onClick={onTrySample}
-            className="px-8 py-3.5 bg-white/5 border border-white/10 hover:border-white/20 text-white font-bold rounded-2xl backdrop-blur-md hover:bg-white/10 transition-all text-sm flex items-center justify-center gap-2"
-          >
-            <BookOpen className="w-4 h-4 text-indigo-400" />
-            <span>Explore CS 301 Sample</span>
           </button>
         </div>
       </div>

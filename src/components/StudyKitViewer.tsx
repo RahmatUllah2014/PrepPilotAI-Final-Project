@@ -26,12 +26,19 @@ interface StudyKitViewerProps {
   note: NoteRecord;
   onBack: () => void;
   onOpenChat?: () => void;
+  initialTab?: 'summary' | 'topics' | 'flashcards' | 'quiz' | 'plan' | 'simple' | 'json';
 }
 
-export const StudyKitViewer: React.FC<StudyKitViewerProps> = ({ note, onBack, onOpenChat }) => {
-  const [activeTab, setActiveTab] = useState<'summary' | 'topics' | 'flashcards' | 'quiz' | 'plan' | 'simple' | 'json'>('summary');
+export const StudyKitViewer: React.FC<StudyKitViewerProps> = ({ note, onBack, onOpenChat, initialTab }) => {
+  const [activeTab, setActiveTab] = useState<'summary' | 'topics' | 'flashcards' | 'quiz' | 'plan' | 'simple' | 'json'>(initialTab || 'summary');
   const [copied, setCopied] = useState(false);
   const [copiedJson, setCopiedJson] = useState(false);
+
+  React.useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab, note.id]);
 
   const { analysis } = note;
 

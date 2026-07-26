@@ -1,12 +1,12 @@
 {
-  "projectId": "awesome-reef-86pck",
-  "appId": "1:853890906449:web:92c6c9f59e48a0a5f83b70",
-  "apiKey": "AIzaSyD_I3sWTu3hVCINXjSIVUS24qhbrAr-67E",
-  "authDomain": "awesome-reef-86pck.firebaseapp.com",
+  "projectId": "preppilot-ai-c36e0",
+  "appId": "1:609805057555:web:75edf6cbf30953583bc9e6",
+  "apiKey": "AIzaSyCjYbRB-eurdTh0S0rmppF_rGqnfBCh760",
+  "authDomain": "preppilot-ai-c36e0.firebaseapp.com",
   "firestoreDatabaseId": "ai-studio-preppilotai-92649da4-4be1-46ef-a0a3-cebfb1e6bb98",
-  "storageBucket": "awesome-reef-86pck.firebasestorage.app",
-  "messagingSenderId": "853890906449",
-  "measurementId": "",
+  "storageBucket": "preppilot-ai-c36e0.firebasestorage.app",
+  "messagingSenderId": "609805057555",
+  "measurementId": "G-Y7LRG3ZNWP",
   "oAuthClientId": "853890906449-24vplj4muen4l5j5fchji5knlbipmbsq.apps.googleusercontent.com",
   "recaptchaSiteKey": ""
 }

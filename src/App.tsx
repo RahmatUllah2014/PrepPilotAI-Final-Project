@@ -12,7 +12,6 @@ import { StudyKitViewer } from './components/StudyKitViewer';
 import { DashboardView } from './components/DashboardView';
 import { HistoryView } from './components/HistoryView';
 import { AiChatModal } from './components/AiChatModal';
-import { SAMPLE_NOTES } from './lib/sampleData';
 import { NoteRecord } from './types';
 import { BookOpen, MessageSquare, Sparkles } from 'lucide-react';
 
@@ -29,6 +28,7 @@ function AppContent() {
     title: '',
   });
 
+  const [viewerInitialTab, setViewerInitialTab] = useState<'summary' | 'topics' | 'flashcards' | 'quiz' | 'plan' | 'simple'>('summary');
   const [isLoadingNotes, setIsLoadingNotes] = useState(false);
 
   const [notes, setNotes] = useState<NoteRecord[]>(() => {
@@ -43,7 +43,7 @@ function AppContent() {
     } catch (e) {
       // ignore
     }
-    return SAMPLE_NOTES;
+    return [];
   });
 
   // Fetch Firestore notes when user updates
@@ -75,28 +75,30 @@ function AppContent() {
     setIsChatOpen(true);
   };
 
-  const handleAnalysisComplete = (newRecord: NoteRecord) => {
+  const handleAnalysisComplete = (
+    newRecord: NoteRecord,
+    targetTab?: 'summary' | 'topics' | 'flashcards' | 'quiz' | 'plan' | 'simple'
+  ) => {
     setNotes((prev) => [newRecord, ...prev.filter((n) => n.id !== newRecord.id)]);
     setSelectedNote(newRecord);
     setIsUploaderOpen(false);
+    setViewerInitialTab(targetTab || 'summary');
     setActiveTab('studykit');
     setChatContext({
       pdfText: newRecord.pdfTextSnippet || newRecord.title,
       title: newRecord.title,
     });
-    setIsChatOpen(true);
   };
 
-  const handleTrySample = () => {
-    const sample = SAMPLE_NOTES[0];
-    setSelectedNote(sample);
-    setActiveTab('studykit');
-  };
-
-  const handleSelectNote = (note: NoteRecord) => {
+  const handleSelectNote = (
+    note: NoteRecord,
+    targetTab?: 'summary' | 'topics' | 'flashcards' | 'quiz' | 'plan' | 'simple'
+  ) => {
     setSelectedNote(note);
+    setViewerInitialTab(targetTab || 'summary');
     setActiveTab('studykit');
   };
+
 
   const handleDeleteNote = async (id: string) => {
     setNotes((prev) => prev.filter((n) => n.id !== id));
@@ -172,13 +174,11 @@ function AppContent() {
           <div>
             <HeroSection
               onOpenUpload={() => setIsUploaderOpen(true)}
-              onTrySample={handleTrySample}
             />
             <FeaturesSection />
             <HowItWorksSection />
             <CtaSection
               onOpenUpload={() => setIsUploaderOpen(true)}
-              onTrySample={handleTrySample}
             />
           </div>
         )}
@@ -189,7 +189,6 @@ function AppContent() {
             notes={notes}
             onSelectNote={handleSelectNote}
             onOpenUpload={() => setIsUploaderOpen(true)}
-            onTrySample={handleTrySample}
           />
         )}
 
@@ -209,6 +208,7 @@ function AppContent() {
           selectedNote ? (
             <StudyKitViewer
               note={selectedNote}
+              initialTab={viewerInitialTab}
               onBack={() => setActiveTab('dashboard')}
               onOpenChat={() => {
                 handleOpenChatWithText(selectedNote.pdfTextSnippet || selectedNote.title, selectedNote.title);
@@ -229,12 +229,6 @@ function AppContent() {
                   className="px-5 py-2.5 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 font-semibold text-xs rounded-xl transition-all shadow-sm"
                 >
                   Browse Saved Notes ({notes.length})
-                </button>
-                <button
-                  onClick={handleTrySample}
-                  className="px-5 py-2.5 bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 font-semibold text-xs rounded-xl transition-all"
-                >
-                  Load CS 301 Sample Note
                 </button>
                 <button
                   onClick={() => setIsUploaderOpen(true)}

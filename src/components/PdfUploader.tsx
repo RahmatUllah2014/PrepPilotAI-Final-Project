@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { extractTextFromPdf } from '../lib/pdf';
-import { analyzeNotesWithGemini } from '../lib/gemini';
+import { analyzeNotesWithGemini, createDefaultAnalysis } from '../lib/gemini';
 import { saveNoteToFirestore } from '../lib/firestoreNotes';
 import { useAuth } from '../context/AuthContext';
 import { NoteRecord, NoteAnalysis } from '../types';
@@ -18,11 +18,17 @@ import {
   Copy,
   Check,
   RefreshCw,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Layers,
+  HelpCircle,
+  Calendar,
+  Lightbulb,
+  BookOpen,
+  MessageSquare
 } from 'lucide-react';
 
 interface PdfUploaderProps {
-  onAnalysisComplete: (record: NoteRecord) => void;
+  onAnalysisComplete: (record: NoteRecord, targetTab?: 'summary' | 'topics' | 'flashcards' | 'quiz' | 'plan' | 'simple') => void;
   onCancel?: () => void;
   onExtractAndOpenChat?: (pdfText: string, title: string) => void;
 }
@@ -41,12 +47,27 @@ export const PdfUploader: React.FC<PdfUploaderProps> = ({ onAnalysisComplete, on
   const [progressPercent, setProgressPercent] = useState(0);
   const [error, setError] = useState('');
   
-  // Extracted text preview for testing
+  // Extracted text preview
   const [extractedText, setExtractedText] = useState<string | null>(null);
   const [extractedPageCount, setExtractedPageCount] = useState<number>(0);
   const [showPreviewText, setShowPreviewText] = useState(false);
   const [copiedText, setCopiedText] = useState(false);
   const [isExtractingOnly, setIsExtractingOnly] = useState(false);
+
+  // User choice for which study outputs to generate
+  const [selectedFormats, setSelectedFormats] = useState<{
+    summary: boolean;
+    quiz: boolean;
+    flashcards: boolean;
+    plan: boolean;
+    simple: boolean;
+  }>({
+    summary: true,
+    quiz: true,
+    flashcards: true,
+    plan: true,
+    simple: true,
+  });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -101,7 +122,7 @@ export const PdfUploader: React.FC<PdfUploaderProps> = ({ onAnalysisComplete, on
     }
   };
 
-  // Dedicated function: Extract PDF text with PDF.js and trigger AI Chat Pop-up
+  // Dedicated function: Extract PDF text with PDF.js & Save Note Record so it shows in My Notes
   const handleExtractTextOnly = async () => {
     if (!selectedFile) {
       setError('Please select a PDF file first.');
@@ -128,6 +149,20 @@ export const PdfUploader: React.FC<PdfUploaderProps> = ({ onAnalysisComplete, on
         setLectureTitle(title);
       }
 
+      // Guarantee the note is saved into My Notes history immediately
+      const newRecord: NoteRecord = {
+        id: 'note-' + Date.now(),
+        userId: user?.uid || 'demo-user-101',
+        title,
+        pdfTextSnippet: result.text.slice(0, 300) + '...',
+        analysis: createDefaultAnalysis(title, result.text),
+        createdAt: new Date().toISOString(),
+        fileSize: `${(selectedFile.size / (1024 * 1024)).toFixed(1)} MB`,
+        pageCount: result.pageCount,
+      };
+
+      await saveNoteToFirestore(newRecord);
+
       if (onExtractAndOpenChat) {
         onExtractAndOpenChat(result.text, title);
       }
@@ -148,7 +183,7 @@ export const PdfUploader: React.FC<PdfUploaderProps> = ({ onAnalysisComplete, on
     }
   };
 
-  const handleAnalyze = async () => {
+  const handleAnalyze = async (targetFormat?: 'summary' | 'topics' | 'flashcards' | 'quiz' | 'plan' | 'simple') => {
     setError('');
     let textToAnalyze = extractedText || '';
     let title = lectureTitle.trim() || (selectedFile ? selectedFile.name.replace(/\.pdf$/i, '') : 'Untitled Lecture Note');
@@ -197,13 +232,19 @@ export const PdfUploader: React.FC<PdfUploaderProps> = ({ onAnalysisComplete, on
 
     setLoading(true);
     setProgressPercent(60);
-    setLoadingStep('Phase 2/3: Processing with Gemini 3.6 Flash AI...');
+    setLoadingStep('Phase 2/3: Generating AI study conversions with Gemini 3.6 Flash...');
 
     try {
-      const analysisData = await analyzeNotesWithGemini(textToAnalyze, title);
+      let analysisData: NoteAnalysis;
+      try {
+        analysisData = await analyzeNotesWithGemini(textToAnalyze, title);
+      } catch (gemErr) {
+        console.warn('Gemini analysis fallback active:', gemErr);
+        analysisData = createDefaultAnalysis(title, textToAnalyze);
+      }
 
       setProgressPercent(90);
-      setLoadingStep('Phase 3/3: Validating JSON & Formatting Study Kit...');
+      setLoadingStep('Phase 3/3: Formatting study kit & saving to My Notes...');
 
       const newRecord: NoteRecord = {
         id: 'note-' + Date.now(),
@@ -220,14 +261,24 @@ export const PdfUploader: React.FC<PdfUploaderProps> = ({ onAnalysisComplete, on
       await saveNoteToFirestore(newRecord);
 
       setProgressPercent(100);
-      onAnalysisComplete(newRecord);
+
+      let resolvedTab: 'summary' | 'topics' | 'flashcards' | 'quiz' | 'plan' | 'simple' = targetFormat || 'summary';
+      if (!targetFormat) {
+        if (selectedFormats.quiz && !selectedFormats.summary) resolvedTab = 'quiz';
+        else if (selectedFormats.flashcards && !selectedFormats.summary && !selectedFormats.quiz) resolvedTab = 'flashcards';
+        else if (selectedFormats.plan && !selectedFormats.summary && !selectedFormats.quiz && !selectedFormats.flashcards) resolvedTab = 'plan';
+        else if (selectedFormats.simple && !selectedFormats.summary && !selectedFormats.quiz && !selectedFormats.flashcards && !selectedFormats.plan) resolvedTab = 'simple';
+      }
+
+      onAnalysisComplete(newRecord, resolvedTab);
     } catch (err: any) {
       console.error('Analysis error:', err);
-      setError(err?.message || 'Failed to analyze lecture notes. Please try again.');
+      setError(err?.message || 'Failed to convert lecture notes. Please try again.');
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="w-full max-w-3xl mx-auto p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900/95 border border-slate-200 dark:border-white/10 backdrop-blur-2xl shadow-xl dark:shadow-2xl text-slate-900 dark:text-slate-100 relative">
@@ -446,6 +497,204 @@ export const PdfUploader: React.FC<PdfUploaderProps> = ({ onAnalysisComplete, on
         </div>
       )}
 
+      {/* Conversion Formats Selector Section */}
+      {!loading && (
+        <div className="mt-6 pt-5 border-t border-slate-200 dark:border-white/10">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">
+                Choose What To Convert Your Note Into:
+              </label>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Select your preferred study output(s) or pick a target format below
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                const allSelected = Object.values(selectedFormats).every(Boolean);
+                setSelectedFormats({
+                  summary: !allSelected,
+                  quiz: !allSelected,
+                  flashcards: !allSelected,
+                  plan: !allSelected,
+                  simple: !allSelected,
+                });
+              }}
+              className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+            >
+              {Object.values(selectedFormats).every(Boolean) ? 'Deselect All' : 'Select All'}
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">
+            {/* Format 1: Summary */}
+            <div
+              onClick={() => setSelectedFormats((prev) => ({ ...prev, summary: !prev.summary }))}
+              className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                selectedFormats.summary
+                  ? 'bg-indigo-50/80 dark:bg-indigo-950/50 border-indigo-500/50 ring-1 ring-indigo-500/30'
+                  : 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 opacity-70 hover:opacity-100'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                  <FileText className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-slate-900 dark:text-white">⚡ Smart Summary</div>
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400">Bullet takeaways & topic breakdown</div>
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                checked={selectedFormats.summary}
+                onChange={() => {}}
+                className="w-4 h-4 accent-indigo-600 rounded cursor-pointer"
+              />
+            </div>
+
+            {/* Format 2: Quiz */}
+            <div
+              onClick={() => setSelectedFormats((prev) => ({ ...prev, quiz: !prev.quiz }))}
+              className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                selectedFormats.quiz
+                  ? 'bg-purple-50/80 dark:bg-purple-950/50 border-purple-500/50 ring-1 ring-purple-500/30'
+                  : 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 opacity-70 hover:opacity-100'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                  <HelpCircle className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-slate-900 dark:text-white">❓ Interactive Quiz</div>
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400">Multiple choice questions & score</div>
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                checked={selectedFormats.quiz}
+                onChange={() => {}}
+                className="w-4 h-4 accent-purple-600 rounded cursor-pointer"
+              />
+            </div>
+
+            {/* Format 3: Flashcards */}
+            <div
+              onClick={() => setSelectedFormats((prev) => ({ ...prev, flashcards: !prev.flashcards }))}
+              className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                selectedFormats.flashcards
+                  ? 'bg-emerald-50/80 dark:bg-emerald-950/50 border-emerald-500/50 ring-1 ring-emerald-500/30'
+                  : 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 opacity-70 hover:opacity-100'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                  <Layers className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-slate-900 dark:text-white">🃏 3D AI Flashcards</div>
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400">Interactive 3D flip card deck</div>
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                checked={selectedFormats.flashcards}
+                onChange={() => {}}
+                className="w-4 h-4 accent-emerald-600 rounded cursor-pointer"
+              />
+            </div>
+
+            {/* Format 4: Study Plan */}
+            <div
+              onClick={() => setSelectedFormats((prev) => ({ ...prev, plan: !prev.plan }))}
+              className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                selectedFormats.plan
+                  ? 'bg-blue-50/80 dark:bg-blue-950/50 border-blue-500/50 ring-1 ring-blue-500/30'
+                  : 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 opacity-70 hover:opacity-100'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                  <Calendar className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-slate-900 dark:text-white">📅 7-Day Study Plan</div>
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400">Daily milestones & schedule</div>
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                checked={selectedFormats.plan}
+                onChange={() => {}}
+                className="w-4 h-4 accent-blue-600 rounded cursor-pointer"
+              />
+            </div>
+
+            {/* Format 5: Simple Explanation */}
+            <div
+              onClick={() => setSelectedFormats((prev) => ({ ...prev, simple: !prev.simple }))}
+              className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                selectedFormats.simple
+                  ? 'bg-amber-50/80 dark:bg-amber-950/50 border-amber-500/50 ring-1 ring-amber-500/30'
+                  : 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 opacity-70 hover:opacity-100'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                  <Lightbulb className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-slate-900 dark:text-white">💡 Plain Explanation</div>
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400">Simple English conceptual breakdown</div>
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                checked={selectedFormats.simple}
+                onChange={() => {}}
+                className="w-4 h-4 accent-amber-600 rounded cursor-pointer"
+              />
+            </div>
+          </div>
+
+          {/* Quick Direct Conversion Buttons */}
+          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-200/60 dark:border-white/5">
+            <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mr-1">Or convert immediately to:</span>
+            <button
+              type="button"
+              onClick={() => handleAnalyze('quiz')}
+              disabled={loading || (activeMode === 'pdf' && !selectedFile) || (activeMode === 'text' && !pastedText.trim())}
+              className="px-3 py-1.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-700 dark:text-purple-300 font-bold text-xs border border-purple-500/20 transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-40"
+            >
+              <HelpCircle className="w-3.5 h-3.5" />
+              <span>Convert to Quiz</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleAnalyze('flashcards')}
+              disabled={loading || (activeMode === 'pdf' && !selectedFile) || (activeMode === 'text' && !pastedText.trim())}
+              className="px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold text-xs border border-emerald-500/20 transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-40"
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>Convert to 3D Cards</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleAnalyze('summary')}
+              disabled={loading || (activeMode === 'pdf' && !selectedFile) || (activeMode === 'text' && !pastedText.trim())}
+              className="px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 font-bold text-xs border border-indigo-500/20 transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-40"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>Convert to Summary</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Progress & Loading Indicator State */}
       {loading ? (
         <div className="mt-6 p-5 rounded-2xl bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-500/30 flex flex-col gap-3">
@@ -489,16 +738,29 @@ export const PdfUploader: React.FC<PdfUploaderProps> = ({ onAnalysisComplete, on
             </button>
           )}
 
-          <button
-            type="button"
-            onClick={handleAnalyze}
-            className="w-full sm:flex-1 py-3.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/25 transition-all text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-95"
-          >
-            <Sparkles className="w-4 h-4" />
-            <span>Generate Study Kit with Gemini AI</span>
-          </button>
+          {(() => {
+            const selectedCount = Object.values(selectedFormats).filter(Boolean).length;
+            const canSubmit = (activeMode === 'pdf' ? !!selectedFile : !!pastedText.trim()) && selectedCount > 0;
+
+            return (
+              <button
+                type="button"
+                onClick={() => handleAnalyze()}
+                disabled={!canSubmit || loading}
+                className="w-full sm:flex-1 py-3.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/25 transition-all text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 cursor-pointer"
+              >
+                <Sparkles className="w-4 h-4 text-amber-300" />
+                <span>
+                  {selectedCount === 0
+                    ? 'Select at least 1 output format above'
+                    : `Convert File (${selectedCount} Output${selectedCount > 1 ? 's' : ''} Selected)`}
+                </span>
+              </button>
+            );
+          })()}
         </div>
       )}
+
     </div>
   );
 

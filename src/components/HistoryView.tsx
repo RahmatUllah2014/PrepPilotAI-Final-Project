@@ -21,7 +21,7 @@ import {
 
 interface HistoryViewProps {
   notes: NoteRecord[];
-  onSelectNote: (note: NoteRecord) => void;
+  onSelectNote: (note: NoteRecord, targetTab?: 'summary' | 'topics' | 'flashcards' | 'quiz' | 'plan' | 'simple') => void;
   onOpenUpload: () => void;
   onDeleteNote: (id: string) => Promise<void> | void;
   isLoading?: boolean;
@@ -276,38 +276,82 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                     )}
                   </div>
 
-                  {/* Feature Chips */}
-                  <div className="mt-4 flex flex-wrap items-center gap-2">
-                    {flashcardCount > 0 && (
-                      <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-[10px] font-semibold flex items-center gap-1">
-                        <Layers className="w-3 h-3" />
-                        {flashcardCount} Cards
-                      </span>
-                    )}
-                    {quizCount > 0 && (
-                      <span className="px-2 py-0.5 rounded-md bg-purple-500/10 border border-purple-500/20 text-purple-700 dark:text-purple-300 text-[10px] font-semibold flex items-center gap-1">
-                        <HelpCircle className="w-3 h-3" />
-                        {quizCount} Quiz Qs
-                      </span>
-                    )}
-                    <span className="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 text-[10px] font-semibold flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      7-Day Plan
-                    </span>
+                  {/* Conversion Action Pills */}
+                  <div className="mt-4 pt-3 border-t border-slate-200/80 dark:border-white/5 flex flex-wrap items-center gap-1.5 text-[10px]">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelectNote(note, 'summary');
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-300 font-semibold hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-colors cursor-pointer flex items-center gap-1"
+                    >
+                      <FileText className="w-3 h-3 text-indigo-500" />
+                      ⚡ Summary
+                    </button>
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelectNote(note, 'quiz');
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-500/30 text-purple-700 dark:text-purple-300 font-semibold hover:bg-purple-100 dark:hover:bg-purple-900/60 transition-colors cursor-pointer flex items-center gap-1"
+                    >
+                      <HelpCircle className="w-3 h-3 text-purple-500" />
+                      ❓ Quiz ({quizCount})
+                    </button>
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelectNote(note, 'flashcards');
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-300 font-semibold hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-colors cursor-pointer flex items-center gap-1"
+                    >
+                      <Layers className="w-3 h-3 text-emerald-500" />
+                      🃏 3D Cards ({flashcardCount})
+                    </button>
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelectNote(note, 'plan');
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-500/30 text-blue-700 dark:text-blue-300 font-semibold hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors cursor-pointer flex items-center gap-1"
+                    >
+                      <Calendar className="w-3 h-3 text-blue-500" />
+                      📅 7-Day Plan
+                    </button>
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelectNote(note, 'simple');
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-500/30 text-amber-700 dark:text-amber-300 font-semibold hover:bg-amber-100 dark:hover:bg-amber-900/60 transition-colors cursor-pointer flex items-center gap-1"
+                    >
+                      💡 Explanation
+                    </button>
                   </div>
                 </div>
 
                 {/* Card Footer */}
-                <div className="mt-6 pt-3 border-t border-slate-200/80 dark:border-white/5 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                <div className="mt-4 pt-3 border-t border-slate-200/80 dark:border-white/5 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
                   <span className="flex items-center gap-1.5 font-medium">
                     <Clock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                     {formatDate(note.createdAt)}
                   </span>
 
-                  <span className="text-indigo-600 dark:text-indigo-400 font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                    View Kit <ChevronRight className="w-4 h-4" />
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectNote(note, 'summary');
+                    }}
+                    className="text-indigo-600 dark:text-indigo-400 font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform cursor-pointer"
+                  >
+                    Open Kit <ChevronRight className="w-4 h-4" />
                   </span>
                 </div>
+
               </div>
             );
           })}

@@ -3,10 +3,9 @@ import { Upload, Sparkles, FileText, ArrowRight, ShieldCheck, Zap } from 'lucide
 
 interface HeroSectionProps {
   onOpenUpload: () => void;
-  onTrySample: () => void;
 }
 
-export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenUpload, onTrySample }) => {
+export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenUpload }) => {
   return (
     <section className="relative z-10 pt-16 pb-20 px-6 lg:px-12 max-w-7xl mx-auto text-center flex flex-col items-center">
       {/* Background Ambient Glows */}
@@ -36,21 +35,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenUpload, onTrySam
       </p>
 
       {/* Primary Hero CTAs */}
-      <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+      <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center">
         <button
           onClick={onOpenUpload}
           className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold rounded-2xl shadow-xl shadow-indigo-600/30 hover:scale-[1.02] active:scale-95 transition-all text-sm sm:text-base flex items-center justify-center gap-2 group"
         >
           <Upload className="w-5 h-5 group-hover:-translate-y-0.5 transition-transform" />
           <span>Upload PDF Lecture</span>
-        </button>
-
-        <button
-          onClick={onTrySample}
-          className="px-8 py-4 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:border-indigo-500/50 text-slate-800 dark:text-white font-bold rounded-2xl backdrop-blur-md hover:bg-slate-100 dark:hover:bg-white/10 active:scale-95 transition-all text-sm sm:text-base flex items-center justify-center gap-2 group shadow-sm dark:shadow-none"
-        >
-          <Sparkles className="w-5 h-5 text-indigo-500 dark:text-indigo-400 group-hover:rotate-12 transition-transform" />
-          <span>Try Sample Lecture (CS 301)</span>
         </button>
       </div>
 

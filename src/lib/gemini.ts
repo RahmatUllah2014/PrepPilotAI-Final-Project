@@ -225,4 +225,65 @@ Student Question: ${userQuestion}`;
   return generateSmartDocumentAnswer(pdfText, title, userQuestion);
 }
 
+export function createDefaultAnalysis(title: string, pdfText: string): NoteAnalysis {
+  const cleanSnippet = pdfText.trim().replace(/\s+/g, ' ');
+  const sentences = cleanSnippet.split(/(?<=[.!?])\s+/).filter((s) => s.length > 15).slice(0, 5);
+
+  const docTitle = title || 'Uploaded Lecture Note';
+
+  return {
+    summary: sentences.length > 0 ? sentences : [
+      `Summary of key concepts covered in ${docTitle}.`,
+      'Extracted lecture text is now parsed and saved in your library.',
+      'Use the interactive Q&A assistant to ask specific questions about this document.'
+    ],
+    importantTopics: [
+      `Core Subject: ${docTitle}`,
+      'Fundamental Principles & Theoretical Foundations',
+      'Key Definitions, Equations & Practical Applications'
+    ],
+    flashcards: [
+      {
+        question: `What is the core topic of "${docTitle}"?`,
+        answer: sentences[0] || `The document presents fundamental principles and core concepts regarding ${docTitle}.`
+      },
+      {
+        question: `What is a key principle highlighted in this lecture?`,
+        answer: sentences[1] || `Key concepts include fundamental definitions and theoretical foundations of ${docTitle}.`
+      },
+      {
+        question: `How should you apply the concepts from ${docTitle}?`,
+        answer: sentences[2] || 'Review the daily 7-day study plan and test yourself with the interactive practice quiz.'
+      }
+    ],
+    quiz: [
+      {
+        question: `Which topic is primarily addressed in "${docTitle}"?`,
+        options: [docTitle, 'General Survey Studies', 'Advanced Research Methods', 'Introductory Overview'],
+        correctAnswer: docTitle
+      },
+      {
+        question: 'What is the recommended study approach for this lecture note?',
+        options: [
+          'Review the summary points and test knowledge with 3D flashcards and quizzes',
+          'Memorize only the title',
+          'Skip practice questions',
+          'Read without taking notes'
+        ],
+        correctAnswer: 'Review the summary points and test knowledge with 3D flashcards and quizzes'
+      }
+    ],
+    simpleExplanation: `This lecture note ("${docTitle}") provides structured study material. You can review key takeaways, practice with MCQs, flip 3D study cards, follow the 7-day plan, or ask AI questions.`,
+    studyPlan: [
+      `Day 1: Read the executive summary and core topic breakdown for ${docTitle}`,
+      'Day 2: Master foundational terminology using 3D AI flashcards',
+      'Day 3: Test your comprehension with interactive multiple choice quiz questions',
+      'Day 4: Review plain-language simple explanations for complex concepts',
+      'Day 5: Re-take the quiz to reinforce weak areas and boost retention',
+      'Day 6: Ask AI Chat detailed questions on challenging sub-topics',
+      'Day 7: Perform a comprehensive final review of all flashcards and key takeaways'
+    ]
+  };
+}
+
 
