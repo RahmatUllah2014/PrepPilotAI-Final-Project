@@ -127,7 +127,7 @@ const response = await ai.models.generateContent({
 
 ---
 
-## 🛠️ How the Project Was Built and Deployed
+## 🛠️ How To Run The Project: 
 
 This project was developed and deployed using the following workflow:
 
@@ -156,54 +156,6 @@ This project was developed and deployed using the following workflow:
    * The environment variables from the `.env` file were added to the Vercel project settings.
    * Vercel automatically built and deployed the application, enabling continuous deployment whenever changes were pushed to the main branch.
 
----
-
-## 🏃 How to Run the Project Locally
-
-### **Prerequisites**
-- **Node.js**: v18.0.0 or higher
-- **npm**: v9.0.0 or higher
-- **Google Gemini API Key**: Obtainable from [Google AI Studio](https://aistudio.google.com/)
-
-### **Step-by-Step Setup**
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/RahmatUllah2014/PrepPilotAI-Final-Project.git
-   cd PrepPilotAI-Final-Project
-   ```
-
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-
-3. **Configure Environment Variables**:
-   Create a `.env` file in the root directory (refer to `.env.example`):
-   ```env
-   # Server-side Google Gemini API Key (Secret)
-   GEMINI_API_KEY=your_gemini_api_key_here
-
-   # Client-side Firebase Configuration (Optional for Cloud Sync)
-   VITE_FIREBASE_API_KEY=your_firebase_api_key
-   VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-   VITE_FIREBASE_PROJECT_ID=your_project_id
-   VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-   VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
-   VITE_FIREBASE_APP_ID=your_app_id
-   ```
-
-4. **Start the Development Server**:
-   ```bash
-   npm run dev
-   ```
-   *The server runs on `http://localhost:3000` handling both Vite frontend assets and Express proxy routes.*
-
-5. **Build for Production**:
-   ```bash
-   npm run build
-   npm run start
-   ```
 
 ---
 
