@@ -34,13 +34,13 @@ const rawApiKey = import.meta.env.VITE_FIREBASE_API_KEY || firebaseConfig.apiKey
 const rawProjectId = import.meta.env.VITE_FIREBASE_PROJECT_ID || firebaseConfig.projectId;
 
 const config = {
-  apiKey: rawApiKey || 'AIzaSyDemoKeyForPrepPilotVercelBuild12345',
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || firebaseConfig.authDomain || 'preppilot-demo.firebaseapp.com',
-  projectId: rawProjectId || 'preppilot-demo',
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || firebaseConfig.storageBucket || 'preppilot-demo.appspot.com',
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || firebaseConfig.messagingSenderId || '1234567890',
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || firebaseConfig.appId || '1:1234567890:web:abcdef',
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || firebaseConfig.measurementId || '',
+  apiKey: rawApiKey || 'AIzaSyCjYbRB-eurdTh0S0rmppF_rGqnfBCh760',
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || firebaseConfig.authDomain || 'preppilot-ai-c36e0.firebaseapp.com',
+  projectId: rawProjectId || 'preppilot-ai-c36e0',
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || firebaseConfig.storageBucket || 'preppilot-ai-c36e0.firebasestorage.app',
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || firebaseConfig.messagingSenderId || '609805057555',
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || firebaseConfig.appId || '1:609805057555:web:75edf6cbf30953583bc9e6',
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || firebaseConfig.measurementId || 'G-Y7LRG3ZNWP',
 };
 
 let app: any;
