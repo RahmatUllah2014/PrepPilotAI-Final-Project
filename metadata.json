@@ -1,0 +1,6 @@
+{
+  "name": "PrepPilot AI",
+  "description": "Turn lecture notes into summaries, quizzes, flashcards, and study plans using Gemini AI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,70 @@
+{
+  "entities": {
+    "users": {
+      "title": "users",
+      "description": "User profiles",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "email", "createdAt"]
+    },
+    "notes": {
+      "title": "notes",
+      "description": "Saved PDF AI study kits",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "summary": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "importantTopics": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "flashcards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question": { "type": "string" },
+              "answer": { "type": "string" }
+            },
+            "required": ["question", "answer"]
+          }
+        },
+        "quiz": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question": { "type": "string" },
+              "options": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "correctAnswer": { "type": "string" }
+            },
+            "required": ["question", "options", "correctAnswer"]
+          }
+        },
+        "simpleExplanation": { "type": "string" },
+        "studyPlan": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "createdAt": { "type": "string" },
+        "fileSize": { "type": "string" },
+        "pageCount": { "type": "number" },
+        "pdfTextSnippet": { "type": "string" }
+      },
+      "required": ["id", "userId", "title", "summary", "importantTopics", "flashcards", "quiz", "simpleExplanation", "studyPlan", "createdAt"]
+    }
+  }
+}
