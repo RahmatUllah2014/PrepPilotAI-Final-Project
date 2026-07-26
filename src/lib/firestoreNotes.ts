@@ -13,19 +13,31 @@ import { NoteRecord, UserProfile } from '../types';
 const LOCAL_STORAGE_KEY = 'preppilot_saved_notes';
 
 /**
+ * Timeout helper to prevent Firestore SDK calls from hanging indefinitely
+ */
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number = 2500): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`Firestore request timed out after ${timeoutMs}ms`)), timeoutMs)
+    ),
+  ]);
+}
+
+/**
  * Save user profile to Firestore `users` collection
  */
 export async function saveUserProfileToFirestore(user: UserProfile): Promise<void> {
   if (!user || !user.uid) return;
   try {
     const userRef = doc(db, 'users', user.uid);
-    await setDoc(userRef, {
+    await withTimeout(setDoc(userRef, {
       id: user.uid,
       email: user.email || '',
       displayName: user.displayName || 'Student',
       createdAt: user.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-    }, { merge: true });
+    }, { merge: true }), 2000);
   } catch (err) {
     console.warn('Firestore user profile sync warning:', err);
   }
@@ -46,10 +58,10 @@ export async function saveNoteToFirestore(note: NoteRecord): Promise<void> {
     console.warn('Local storage write warning:', e);
   }
 
-  // 2. Persist directly to Firestore `notes` collection
+  // 2. Persist directly to Firestore `notes` collection with a 2.5s timeout safeguard
   try {
     const noteRef = doc(db, 'notes', note.id);
-    await setDoc(noteRef, {
+    await withTimeout(setDoc(noteRef, {
       id: note.id,
       userId: note.userId,
       title: note.title,
@@ -66,7 +78,7 @@ export async function saveNoteToFirestore(note: NoteRecord): Promise<void> {
       isMastered: note.isMastered || false,
       scorePercentage: note.scorePercentage || 0,
       chapterNumber: note.chapterNumber || 1,
-    });
+    }), 2500);
   } catch (err: any) {
     console.warn('Firestore note save warning (using local backup):', err);
   }
@@ -81,7 +93,7 @@ export async function fetchUserNotesFromFirestore(userId: string): Promise<NoteR
   try {
     const notesRef = collection(db, 'notes');
     const q = query(notesRef, where('userId', '==', userId));
-    const querySnapshot = await getDocs(q);
+    const querySnapshot = await withTimeout(getDocs(q), 2500);
 
     const fetchedNotes: NoteRecord[] = [];
     querySnapshot.forEach((docSnap) => {
@@ -144,7 +156,7 @@ export async function fetchUserNotesFromFirestore(userId: string): Promise<NoteR
 export async function deleteNoteFromFirestore(noteId: string): Promise<void> {
   try {
     const noteRef = doc(db, 'notes', noteId);
-    await deleteDoc(noteRef);
+    await withTimeout(deleteDoc(noteRef), 2000);
   } catch (err) {
     console.warn('Firestore delete note warning:', err);
   }
@@ -160,3 +172,4 @@ export async function deleteNoteFromFirestore(noteId: string): Promise<void> {
     // ignore
   }
 }
+
