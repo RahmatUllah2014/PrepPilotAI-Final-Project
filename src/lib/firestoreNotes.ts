@@ -63,6 +63,9 @@ export async function saveNoteToFirestore(note: NoteRecord): Promise<void> {
       fileSize: note.fileSize || 'PDF',
       pageCount: note.pageCount || 1,
       pdfTextSnippet: note.pdfTextSnippet || '',
+      isMastered: note.isMastered || false,
+      scorePercentage: note.scorePercentage || 0,
+      chapterNumber: note.chapterNumber || 1,
     });
   } catch (err: any) {
     console.warn('Firestore note save warning (using local backup):', err);
@@ -91,6 +94,9 @@ export async function fetchUserNotesFromFirestore(userId: string): Promise<NoteR
         createdAt: data.createdAt || new Date().toISOString(),
         fileSize: data.fileSize || 'PDF',
         pageCount: data.pageCount || 1,
+        isMastered: data.isMastered || false,
+        scorePercentage: data.scorePercentage || 0,
+        chapterNumber: data.chapterNumber || 1,
         analysis: {
           summary: data.summary || [],
           importantTopics: data.importantTopics || [],

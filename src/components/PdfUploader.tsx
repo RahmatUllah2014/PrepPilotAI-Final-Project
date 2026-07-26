@@ -24,7 +24,8 @@ import {
   Calendar,
   Lightbulb,
   BookOpen,
-  MessageSquare
+  MessageSquare,
+  Sliders
 } from 'lucide-react';
 
 interface PdfUploaderProps {
@@ -68,6 +69,10 @@ export const PdfUploader: React.FC<PdfUploaderProps> = ({ onAnalysisComplete, on
     plan: true,
     simple: true,
   });
+
+  // User choice for item quantities
+  const [quizCount, setQuizCount] = useState<number>(5);
+  const [flashcardCount, setFlashcardCount] = useState<number>(5);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -237,10 +242,10 @@ export const PdfUploader: React.FC<PdfUploaderProps> = ({ onAnalysisComplete, on
     try {
       let analysisData: NoteAnalysis;
       try {
-        analysisData = await analyzeNotesWithGemini(textToAnalyze, title);
+        analysisData = await analyzeNotesWithGemini(textToAnalyze, title, { quizCount, flashcardCount });
       } catch (gemErr) {
         console.warn('Gemini analysis fallback active:', gemErr);
-        analysisData = createDefaultAnalysis(title, textToAnalyze);
+        analysisData = createDefaultAnalysis(title, textToAnalyze, { quizCount, flashcardCount });
       }
 
       setProgressPercent(90);
@@ -281,7 +286,7 @@ export const PdfUploader: React.FC<PdfUploaderProps> = ({ onAnalysisComplete, on
 
 
   return (
-    <div className="w-full max-w-3xl mx-auto p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900/95 border border-slate-200 dark:border-white/10 backdrop-blur-2xl shadow-xl dark:shadow-2xl text-slate-900 dark:text-slate-100 relative">
+    <div className="w-full max-w-3xl mx-auto p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900/95 border border-slate-200 dark:border-white/10 backdrop-blur-2xl shadow-xl dark:shadow-2xl text-slate-900 dark:text-slate-100 relative max-h-[88vh] overflow-y-auto my-auto">
       {onCancel && (
         <button
           onClick={onCancel}
@@ -656,6 +661,91 @@ export const PdfUploader: React.FC<PdfUploaderProps> = ({ onAnalysisComplete, on
                 onChange={() => {}}
                 className="w-4 h-4 accent-amber-600 rounded cursor-pointer"
               />
+            </div>
+          </div>
+
+          {/* Quantity Controls for Quiz Questions & Flashcards */}
+          <div className="p-4 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-200/80 dark:border-indigo-500/20 mb-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                <Sliders className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                <span>Customize Item Quantities</span>
+              </div>
+              <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold bg-indigo-100 dark:bg-indigo-900/40 px-2 py-0.5 rounded-full">
+                Gemini 3.6 Flash
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Quiz Question Count Selector */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <HelpCircle className="w-3.5 h-3.5 text-purple-500" /> Quiz Questions
+                  </span>
+                  <span className="text-[11px] font-bold text-purple-600 dark:text-purple-400">{quizCount} Questions</span>
+                </label>
+                <div className="flex items-center gap-1.5">
+                  {[3, 5, 10, 15, 20].map((num) => (
+                    <button
+                      key={num}
+                      type="button"
+                      onClick={() => setQuizCount(num)}
+                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        quizCount === num
+                          ? 'bg-purple-600 text-white shadow-sm shadow-purple-600/30 ring-2 ring-purple-600/20'
+                          : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 hover:border-purple-300'
+                      }`}
+                    >
+                      {num}
+                    </button>
+                  ))}
+                  <input
+                    type="number"
+                    min={1}
+                    max={30}
+                    value={quizCount}
+                    onChange={(e) => setQuizCount(Math.max(1, Math.min(30, parseInt(e.target.value) || 5)))}
+                    className="w-12 py-1 px-1 text-center text-xs font-bold rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:border-purple-500"
+                    title="Custom question count"
+                  />
+                </div>
+              </div>
+
+              {/* Flashcard Count Selector */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <Layers className="w-3.5 h-3.5 text-emerald-500" /> Flashcards
+                  </span>
+                  <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">{flashcardCount} Cards</span>
+                </label>
+                <div className="flex items-center gap-1.5">
+                  {[3, 5, 10, 15, 20].map((num) => (
+                    <button
+                      key={num}
+                      type="button"
+                      onClick={() => setFlashcardCount(num)}
+                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        flashcardCount === num
+                          ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/30 ring-2 ring-emerald-600/20'
+                          : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 hover:border-emerald-300'
+                      }`}
+                    >
+                      {num}
+                    </button>
+                  ))}
+                  <input
+                    type="number"
+                    min={1}
+                    max={30}
+                    value={flashcardCount}
+                    onChange={(e) => setFlashcardCount(Math.max(1, Math.min(30, parseInt(e.target.value) || 5)))}
+                    className="w-12 py-1 px-1 text-center text-xs font-bold rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                    title="Custom flashcard count"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 

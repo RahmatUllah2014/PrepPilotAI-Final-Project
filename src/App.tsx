@@ -99,6 +99,10 @@ function AppContent() {
     setActiveTab('studykit');
   };
 
+  const handleUpdateNote = (updatedNote: NoteRecord) => {
+    setSelectedNote(updatedNote);
+    setNotes((prev) => prev.map((n) => (n.id === updatedNote.id ? updatedNote : n)));
+  };
 
   const handleDeleteNote = async (id: string) => {
     setNotes((prev) => prev.filter((n) => n.id !== id));
@@ -129,7 +133,7 @@ function AppContent() {
 
       {/* Upload Modal Overlay */}
       {isUploaderOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in">
+        <div className="fixed inset-0 z-50 overflow-y-auto p-3 sm:p-6 bg-slate-950/80 backdrop-blur-md flex items-center justify-center min-h-screen animate-in fade-in">
           <PdfUploader
             onAnalysisComplete={handleAnalysisComplete}
             onExtractAndOpenChat={(pdfText, title) => {
@@ -147,6 +151,14 @@ function AppContent() {
         onClose={() => setIsChatOpen(false)}
         pdfText={chatContext.pdfText}
         title={chatContext.title}
+        selectedNote={selectedNote}
+        onUpdateNote={handleUpdateNote}
+        onNavigateToStudyKit={(tab) => {
+          if (tab) {
+            setViewerInitialTab(tab);
+          }
+          setActiveTab('studykit');
+        }}
       />
 
       {/* Floating Chat Trigger Button */}
@@ -209,6 +221,11 @@ function AppContent() {
             <StudyKitViewer
               note={selectedNote}
               initialTab={viewerInitialTab}
+              allNotes={notes}
+              onUpdateNote={handleUpdateNote}
+              onContinueToNextChapter={(nextNote) => {
+                handleSelectNote(nextNote, 'summary');
+              }}
               onBack={() => setActiveTab('dashboard')}
               onOpenChat={() => {
                 handleOpenChatWithText(selectedNote.pdfTextSnippet || selectedNote.title, selectedNote.title);

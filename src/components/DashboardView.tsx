@@ -10,7 +10,9 @@ import {
   Calendar, 
   Clock, 
   ChevronRight,
-  Plus
+  Plus,
+  Award,
+  CheckCircle2
 } from 'lucide-react';
 
 interface DashboardViewProps {
@@ -34,6 +36,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     (acc, n) => acc + (n.analysis?.quiz?.length || 0),
     0
   );
+  const masteredCount = notes.filter((n) => n.isMastered).length;
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
@@ -92,11 +95,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         <div className="p-5 rounded-2xl bg-white/80 dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-xl shadow-sm dark:shadow-none">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 mb-3">
-            <Calendar className="w-5 h-5" />
+          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-3">
+            <Award className="w-5 h-5" />
           </div>
-          <div className="text-2xl font-extrabold text-slate-900 dark:text-white">{notes.length * 7}</div>
-          <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Study Days Planned</div>
+          <div className="text-2xl font-extrabold text-slate-900 dark:text-white flex items-baseline gap-1">
+            <span>{masteredCount}</span>
+            <span className="text-xs text-slate-400 font-normal">/ {notes.length}</span>
+          </div>
+          <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Chapters Mastered</div>
         </div>
       </div>
 
@@ -138,12 +144,22 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       PDF
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors line-clamp-1">
-                        {note.title}
-                      </h4>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors line-clamp-1">
+                          {note.title}
+                        </h4>
+                        {note.isMastered && (
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold flex items-center gap-1 shrink-0">
+                            <CheckCircle2 className="w-3 h-3" /> Mastered
+                          </span>
+                        )}
+                      </div>
                       <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                         <Clock className="w-3 h-3" />
                         <span>{new Date(note.createdAt).toLocaleDateString()}</span>
+                        {note.scorePercentage !== undefined && note.scorePercentage > 0 && (
+                          <span className="text-emerald-600 dark:text-emerald-400 font-bold">• Score: {note.scorePercentage}%</span>
+                        )}
                       </div>
                     </div>
                   </div>

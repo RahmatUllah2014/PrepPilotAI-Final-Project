@@ -1,5 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
-import { NoteAnalysis } from '../types';
+import { NoteAnalysis, Flashcard, QuizQuestion } from '../types';
 
 export interface AnalyzeNotesResponse {
   success: boolean;
@@ -11,11 +11,15 @@ export interface AnalyzeNotesResponse {
 
 export async function analyzeNotesWithGemini(
   pdfText: string,
-  title?: string
+  title?: string,
+  options?: { quizCount?: number; flashcardCount?: number }
 ): Promise<NoteAnalysis> {
   if (!pdfText || !pdfText.trim()) {
     throw new Error('No lecture text provided. Extract text from a valid PDF before calling the Gemini API.');
   }
+
+  const quizCount = options?.quizCount || 5;
+  const flashcardCount = options?.flashcardCount || 5;
 
   // Check client-side API key first as fallback for Vercel static deployments
   const clientKey = import.meta.env.VITE_GEMINI_API_KEY;
@@ -31,6 +35,8 @@ export async function analyzeNotesWithGemini(
       body: JSON.stringify({
         pdfText,
         title: title || 'Uploaded Lecture Note',
+        quizCount,
+        flashcardCount,
       }),
     });
     responseStatus = response.status;
@@ -70,8 +76,8 @@ export async function analyzeNotesWithGemini(
 {
   "summary": ["Point 1", "Point 2", "Point 3"],
   "importantTopics": ["Topic 1: breakdown", "Topic 2: breakdown"],
-  "flashcards": [{"question": "Q?", "answer": "A"}],
-  "quiz": [{"question": "Q?", "options": ["A","B","C","D"], "correctAnswer": "A"}],
+  "flashcards": [{"question": "Q?", "answer": "A"}], // generate EXACTLY ${flashcardCount} flashcards
+  "quiz": [{"question": "Q?", "options": ["A","B","C","D"], "correctAnswer": "A"}], // generate EXACTLY ${quizCount} quiz questions
   "simpleExplanation": "Plain terms explanation",
   "studyPlan": ["Day 1: ...", "Day 2: ...", "Day 3: ...", "Day 4: ...", "Day 5: ...", "Day 6: ...", "Day 7: ..."]
 }`;
@@ -100,6 +106,13 @@ export interface ChatMessage {
   sender: 'user' | 'assistant';
   text: string;
   timestamp: string;
+  generatedItems?: {
+    itemType: 'flashcards' | 'quiz';
+    flashcards?: Flashcard[];
+    quiz?: QuizQuestion[];
+    count: number;
+    isAddedToNote?: boolean;
+  };
 }
 
 export function generateSmartDocumentAnswer(
@@ -225,11 +238,144 @@ Student Question: ${userQuestion}`;
   return generateSmartDocumentAnswer(pdfText, title, userQuestion);
 }
 
-export function createDefaultAnalysis(title: string, pdfText: string): NoteAnalysis {
+export interface GeneratedChatItemsResult {
+  success: boolean;
+  itemType: 'flashcards' | 'quiz';
+  count: number;
+  items: any[];
+  error?: string;
+}
+
+export async function generateChatItemsWithGemini(
+  pdfText: string,
+  title: string,
+  itemType: 'flashcards' | 'quiz',
+  count: number = 5,
+  userPrompt?: string
+): Promise<GeneratedChatItemsResult> {
+  const targetCount = Math.min(Math.max(Number(count) || 5, 1), 30);
+  const docTitle = title || 'Extracted Note';
+
+  try {
+    const response = await fetch('/api/chat-generate-items', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        pdfText,
+        title: docTitle,
+        itemType,
+        count: targetCount,
+        userPrompt,
+      }),
+    });
+
+    if (response.ok) {
+      const json = await response.json();
+      if (json.success && Array.isArray(json.items)) {
+        return {
+          success: true,
+          itemType,
+          count: json.items.length,
+          items: json.items,
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('Network error on /api/chat-generate-items:', err);
+  }
+
+  // Fallback client-side generation using VITE_GEMINI_API_KEY
+  const clientKey = import.meta.env.VITE_GEMINI_API_KEY;
+  if (clientKey) {
+    try {
+      const ai = new GoogleGenAI({ apiKey: clientKey });
+      if (itemType === 'flashcards') {
+        const prompt = `Generate EXACTLY ${targetCount} flashcards for "${docTitle}". Return JSON: {"flashcards":[{"question":"...","answer":"..."}]}. Text:\n${pdfText.slice(0, 20000)}`;
+        const res = await ai.models.generateContent({
+          model: 'gemini-3.6-flash',
+          contents: prompt,
+          config: { responseMimeType: 'application/json' },
+        });
+        const parsed = JSON.parse(res.text || '{}');
+        return {
+          success: true,
+          itemType: 'flashcards',
+          count: parsed.flashcards?.length || 0,
+          items: parsed.flashcards || [],
+        };
+      } else {
+        const prompt = `Generate EXACTLY ${targetCount} quiz questions for "${docTitle}". Return JSON: {"quiz":[{"question":"...","options":["A","B","C","D"],"correctAnswer":"A"}]}. Text:\n${pdfText.slice(0, 20000)}`;
+        const res = await ai.models.generateContent({
+          model: 'gemini-3.6-flash',
+          contents: prompt,
+          config: { responseMimeType: 'application/json' },
+        });
+        const parsed = JSON.parse(res.text || '{}');
+        return {
+          success: true,
+          itemType: 'quiz',
+          count: parsed.quiz?.length || 0,
+          items: parsed.quiz || [],
+        };
+      }
+    } catch (clientErr) {
+      console.error('Client-side generateChatItems error:', clientErr);
+    }
+  }
+
+  // Mock generated items fallback
+  if (itemType === 'flashcards') {
+    const items = Array.from({ length: targetCount }, (_, i) => ({
+      question: `Key Concept #${i + 1} from ${docTitle}?`,
+      answer: `Important principle and core definition #${i + 1} extracted from lecture material.`,
+    }));
+    return { success: true, itemType: 'flashcards', count: items.length, items };
+  } else {
+    const items = Array.from({ length: targetCount }, (_, i) => ({
+      question: `Practice Quiz Question #${i + 1} for ${docTitle}?`,
+      options: [
+        `Primary core concept #${i + 1}`,
+        `Secondary theory #${i + 1}`,
+        `Alternative formulation #${i + 1}`,
+        `General overview #${i + 1}`,
+      ],
+      correctAnswer: `Primary core concept #${i + 1}`,
+    }));
+    return { success: true, itemType: 'quiz', count: items.length, items };
+  }
+}
+
+export function createDefaultAnalysis(
+  title: string,
+  pdfText: string,
+  options?: { quizCount?: number; flashcardCount?: number }
+): NoteAnalysis {
   const cleanSnippet = pdfText.trim().replace(/\s+/g, ' ');
   const sentences = cleanSnippet.split(/(?<=[.!?])\s+/).filter((s) => s.length > 15).slice(0, 5);
 
   const docTitle = title || 'Uploaded Lecture Note';
+  const requestedQuizCount = Math.min(Math.max(Number(options?.quizCount) || 5, 1), 30);
+  const requestedFlashcardCount = Math.min(Math.max(Number(options?.flashcardCount) || 5, 1), 30);
+
+  const generatedFlashcards = Array.from({ length: requestedFlashcardCount }, (_, i) => ({
+    question: i < sentences.length
+      ? `What is key point #${i + 1} regarding "${docTitle}"?`
+      : `What is concept #${i + 1} in ${docTitle}?`,
+    answer: sentences[i % sentences.length] || `Core definition and explanation #${i + 1} for ${docTitle}.`,
+  }));
+
+  const generatedQuiz = Array.from({ length: requestedQuizCount }, (_, i) => ({
+    question: `Practice Question #${i + 1}: What is a core concept taught in "${docTitle}"?`,
+    options: [
+      sentences[i % sentences.length] || `${docTitle} Core Principle`,
+      'General Survey Overview',
+      'Irrelevant Alternative Option',
+      'Secondary Supplemental Theory'
+    ],
+    correctAnswer: sentences[i % sentences.length] || `${docTitle} Core Principle`,
+  }));
 
   return {
     summary: sentences.length > 0 ? sentences : [
@@ -242,37 +388,8 @@ export function createDefaultAnalysis(title: string, pdfText: string): NoteAnaly
       'Fundamental Principles & Theoretical Foundations',
       'Key Definitions, Equations & Practical Applications'
     ],
-    flashcards: [
-      {
-        question: `What is the core topic of "${docTitle}"?`,
-        answer: sentences[0] || `The document presents fundamental principles and core concepts regarding ${docTitle}.`
-      },
-      {
-        question: `What is a key principle highlighted in this lecture?`,
-        answer: sentences[1] || `Key concepts include fundamental definitions and theoretical foundations of ${docTitle}.`
-      },
-      {
-        question: `How should you apply the concepts from ${docTitle}?`,
-        answer: sentences[2] || 'Review the daily 7-day study plan and test yourself with the interactive practice quiz.'
-      }
-    ],
-    quiz: [
-      {
-        question: `Which topic is primarily addressed in "${docTitle}"?`,
-        options: [docTitle, 'General Survey Studies', 'Advanced Research Methods', 'Introductory Overview'],
-        correctAnswer: docTitle
-      },
-      {
-        question: 'What is the recommended study approach for this lecture note?',
-        options: [
-          'Review the summary points and test knowledge with 3D flashcards and quizzes',
-          'Memorize only the title',
-          'Skip practice questions',
-          'Read without taking notes'
-        ],
-        correctAnswer: 'Review the summary points and test knowledge with 3D flashcards and quizzes'
-      }
-    ],
+    flashcards: generatedFlashcards,
+    quiz: generatedQuiz,
     simpleExplanation: `This lecture note ("${docTitle}") provides structured study material. You can review key takeaways, practice with MCQs, flip 3D study cards, follow the 7-day plan, or ask AI questions.`,
     studyPlan: [
       `Day 1: Read the executive summary and core topic breakdown for ${docTitle}`,

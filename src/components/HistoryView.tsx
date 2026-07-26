@@ -242,10 +242,18 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                 <div>
                   {/* Card Top Row: Badge & Delete Icon */}
                   <div className="flex items-center justify-between mb-3">
-                    <span className="px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-300 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
-                      <Sparkles className="w-3 h-3 text-indigo-500 dark:text-indigo-400" />
-                      Study Kit
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-300 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                        <Sparkles className="w-3 h-3 text-indigo-500 dark:text-indigo-400" />
+                        Study Kit
+                      </span>
+                      {note.isMastered && (
+                        <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                          Mastered
+                        </span>
+                      )}
+                    </div>
 
                     <button
                       onClick={(e) => {

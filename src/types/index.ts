@@ -27,6 +27,9 @@ export interface NoteRecord {
   createdAt: string;
   fileSize?: string;
   pageCount?: number;
+  isMastered?: boolean;
+  scorePercentage?: number;
+  chapterNumber?: number;
 }
 
 export interface UserProfile {

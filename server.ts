@@ -46,13 +46,16 @@ async function startServer() {
   // Server-side Gemini API Route
   app.post('/api/analyze-notes', async (req, res) => {
     try {
-      const { pdfText, title } = req.body || {};
+      const { pdfText, title, quizCount = 5, flashcardCount = 5 } = req.body || {};
 
       if (!pdfText || typeof pdfText !== 'string' || !pdfText.trim()) {
         return res.status(400).json({ 
           error: 'Missing or empty lecture text. Please extract text from a valid PDF before analyzing.' 
         });
       }
+
+      const targetQuizCount = Math.min(Math.max(Number(quizCount) || 5, 1), 30);
+      const targetFlashcardCount = Math.min(Math.max(Number(flashcardCount) || 5, 1), 30);
 
       const apiKey = process.env.GEMINI_API_KEY;
       if (!apiKey) {
@@ -73,6 +76,10 @@ async function startServer() {
 
       const systemPrompt = `You are an expert university professor and master educator. 
 Analyze the following lecture notes and generate a comprehensive study kit.
+CRITICAL QUANTITY INSTRUCTIONS:
+- You MUST generate EXACTLY ${targetQuizCount} multiple-choice quiz questions in the "quiz" array.
+- You MUST generate EXACTLY ${targetFlashcardCount} flashcards in the "flashcards" array.
+
 You MUST return ONLY a valid JSON object matching this schema. Do not include markdown block ticks outside the JSON.
 
 Required JSON Structure:
@@ -277,6 +284,143 @@ Instructions:
       return res.status(500).json({
         error: err?.message || 'Failed to process chat query with Gemini AI.',
       });
+    }
+  });
+
+  // Server-side Gemini Route for Generating On-Demand Flashcards or Quizzes via Chat
+  app.post('/api/chat-generate-items', async (req, res) => {
+    try {
+      const { pdfText, title, itemType, count = 5, userPrompt } = req.body || {};
+
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ error: 'GEMINI_API_KEY is missing on server.' });
+      }
+
+      const ai = new GoogleGenAI({
+        apiKey,
+        httpOptions: {
+          headers: {
+            'User-Agent': 'aistudio-build',
+          },
+        },
+      });
+
+      const targetCount = Math.min(Math.max(Number(count) || 5, 1), 30);
+      const docTitle = title || 'Extracted Note';
+      const textSnippet = (pdfText && typeof pdfText === 'string') ? pdfText.slice(0, 30000) : '';
+
+      if (itemType === 'flashcards') {
+        const prompt = `You are an expert university tutor.
+Generate EXACTLY ${targetCount} high-quality study flashcards based on the document titled "${docTitle}".
+${userPrompt ? `User instructions: ${userPrompt}\n` : ''}
+Document Text:
+"""
+${textSnippet}
+"""
+
+Return ONLY a JSON object matching this schema:
+{
+  "flashcards": [
+    {
+      "question": "Front side question or term?",
+      "answer": "Back side concise answer or definition."
+    }
+  ]
+}`;
+
+        const response = await ai.models.generateContent({
+          model: 'gemini-3.6-flash',
+          contents: prompt,
+          config: {
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: Type.OBJECT,
+              properties: {
+                flashcards: {
+                  type: Type.ARRAY,
+                  items: {
+                    type: Type.OBJECT,
+                    properties: {
+                      question: { type: Type.STRING },
+                      answer: { type: Type.STRING },
+                    },
+                    required: ['question', 'answer'],
+                  },
+                },
+              },
+              required: ['flashcards'],
+            },
+          },
+        });
+
+        const parsed = JSON.parse(response.text || '{}');
+        return res.json({
+          success: true,
+          itemType: 'flashcards',
+          count: parsed.flashcards?.length || 0,
+          items: parsed.flashcards || [],
+        });
+      } else {
+        const prompt = `You are an expert university professor.
+Generate EXACTLY ${targetCount} multiple-choice practice quiz questions based on the document titled "${docTitle}".
+${userPrompt ? `User instructions: ${userPrompt}\n` : ''}
+Document Text:
+"""
+${textSnippet}
+"""
+
+Return ONLY a JSON object matching this schema:
+{
+  "quiz": [
+    {
+      "question": "Question text?",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correctAnswer": "Option A"
+    }
+  ]
+}`;
+
+        const response = await ai.models.generateContent({
+          model: 'gemini-3.6-flash',
+          contents: prompt,
+          config: {
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: Type.OBJECT,
+              properties: {
+                quiz: {
+                  type: Type.ARRAY,
+                  items: {
+                    type: Type.OBJECT,
+                    properties: {
+                      question: { type: Type.STRING },
+                      options: {
+                        type: Type.ARRAY,
+                        items: { type: Type.STRING },
+                      },
+                      correctAnswer: { type: Type.STRING },
+                    },
+                    required: ['question', 'options', 'correctAnswer'],
+                  },
+                },
+              },
+              required: ['quiz'],
+            },
+          },
+        });
+
+        const parsed = JSON.parse(response.text || '{}');
+        return res.json({
+          success: true,
+          itemType: 'quiz',
+          count: parsed.quiz?.length || 0,
+          items: parsed.quiz || [],
+        });
+      }
+    } catch (err: any) {
+      console.error('Server /api/chat-generate-items error:', err);
+      return res.status(500).json({ error: err?.message || 'Failed to generate custom study items.' });
     }
   });
 

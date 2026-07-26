@@ -27,9 +27,20 @@ interface StudyKitViewerProps {
   onBack: () => void;
   onOpenChat?: () => void;
   initialTab?: 'summary' | 'topics' | 'flashcards' | 'quiz' | 'plan' | 'simple' | 'json';
+  allNotes?: NoteRecord[];
+  onUpdateNote?: (updatedNote: NoteRecord) => void;
+  onContinueToNextChapter?: (nextNote: NoteRecord) => void;
 }
 
-export const StudyKitViewer: React.FC<StudyKitViewerProps> = ({ note, onBack, onOpenChat, initialTab }) => {
+export const StudyKitViewer: React.FC<StudyKitViewerProps> = ({ 
+  note, 
+  onBack, 
+  onOpenChat, 
+  initialTab,
+  allNotes,
+  onUpdateNote,
+  onContinueToNextChapter,
+}) => {
   const [activeTab, setActiveTab] = useState<'summary' | 'topics' | 'flashcards' | 'quiz' | 'plan' | 'simple' | 'json'>(initialTab || 'summary');
   const [copied, setCopied] = useState(false);
   const [copiedJson, setCopiedJson] = useState(false);
@@ -163,7 +174,12 @@ export const StudyKitViewer: React.FC<StudyKitViewerProps> = ({ note, onBack, on
           }`}
         >
           <HelpCircle className="w-4 h-4" />
-          <span>Quiz ({analysis.quiz.length} MCQs)</span>
+          <span>Final Test / Quiz ({analysis.quiz.length} MCQs)</span>
+          {note.isMastered && (
+            <span className="ml-1 px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
+              Mastered ✓
+            </span>
+          )}
         </button>
 
         <button
@@ -221,9 +237,19 @@ export const StudyKitViewer: React.FC<StudyKitViewerProps> = ({ note, onBack, on
           <FlashcardsView flashcards={analysis.flashcards} />
         )}
 
-        {/* Tab 4: Quiz */}
+        {/* Tab 4: Quiz & Chapter Final Test */}
         {activeTab === 'quiz' && (
-          <QuizView quiz={analysis.quiz} />
+          <QuizView 
+            quiz={analysis.quiz} 
+            note={note}
+            chapterNumber={note.chapterNumber}
+            allNotes={allNotes}
+            onMasteryAchieved={(updated) => {
+              if (onUpdateNote) onUpdateNote(updated);
+            }}
+            onContinueToNextChapter={onContinueToNextChapter}
+            onBackToDashboard={onBack}
+          />
         )}
 
         {/* Tab 5: Study Plan */}
