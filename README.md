@@ -127,6 +127,37 @@ const response = await ai.models.generateContent({
 
 ---
 
+## 🛠️ How the Project Was Built and Deployed
+
+This project was developed and deployed using the following workflow:
+
+1. **Build the Application**
+
+   * The application was initially built using **Google AI Studio**, which helped generate and accelerate the development of the project's codebase.
+
+2. **Set Up Firebase Firestore**
+
+   * A **Firebase** project was created, and **Cloud Firestore** was configured as the application's database.
+   * The required collections and security rules were set up to store and manage application data.
+
+3. **Create a GitHub Repository**
+
+   * The project source code was uploaded to a **GitHub** repository for version control, collaboration, and continuous deployment.
+
+4. **Configure Environment Variables**
+
+   * All required API keys and Firebase configuration values were stored in a local **`.env`** file.
+   * The `.env` file was excluded from version control using `.gitignore` to keep sensitive information secure.
+   * A `.env.example` file can be provided as a template for anyone who wants to run the project locally.
+
+5. **Deploy with Vercel**
+
+   * The GitHub repository was connected to **Vercel**.
+   * The environment variables from the `.env` file were added to the Vercel project settings.
+   * Vercel automatically built and deployed the application, enabling continuous deployment whenever changes were pushed to the main branch.
+
+---
+
 ## 🏃 How to Run the Project Locally
 
 ### **Prerequisites**
