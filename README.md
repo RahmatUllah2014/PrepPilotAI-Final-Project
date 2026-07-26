@@ -123,7 +123,6 @@ const response = await ai.models.generateContent({
 
 ### 4. Upload Page with Night Mode Function ON
 ![Upload Page](https://6a6647612a4b54c07b28be65.imgix.net/sandbox/Upload%20Page.png?crop=focalpoint&fit=crop)
-*Take chapter tests, achieve mastery status (70%+), and seamlessly continue to subsequent chapters.
 
 ### 5. My Notes Page with Dark Mode ON
 ![My Notes Page](https://6a6647612a4b54c07b28be65.imgix.net/sandbox/DarkMode.png?crop=focalpoint&fit=crop)
